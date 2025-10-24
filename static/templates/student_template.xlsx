@@ -1,0 +1,23 @@
+This file should be a properly formatted Excel file (.xlsx) with the following columns:
+
+1. rollNo (Required) - Student roll number/ID
+2. name - Student's full name
+3. regNo - Registration number
+4. classSection (Required) - Class and section (e.g., "10A")
+5. phoneNumber - Student's contact number
+6. email - Student's email address
+7. address - Student's residential address
+8. fatherName - Father's name
+9. gender - Student's gender
+10. dob - Date of birth (YYYY-MM-DD format)
+11. aadharNo - Aadhar card number
+12. bloodGroup - Blood group
+13. religion - Religion
+14. category - Category (General, OBC, SC, ST, etc.)
+15. caste - Caste information
+16. income - Family income
+
+The first row should contain these column headers. The second row should contain example data.
+Required fields must be filled in for each student record.
+
+Since we can't directly create an Excel file here, the Excel template will be generated dynamically using the downloadTemplate function in excel_upload.js that we've already created. 

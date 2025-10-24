@@ -1,0 +1,3310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chakshu - Student Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <style>
+        :root {
+            --primary-color: #4a4a4a;        /* Darker grey */
+            --secondary-color: #808080;      /* Medium grey */
+            --accent-color: #666666;         /* Keep accent color */
+            --success-color: #5a5a5a;        /* Success grey */
+            --light-bg: #f5f5f5;            /* Light grey background */
+            --dark-bg: #333333;             /* Dark grey */
+            --text-primary: #333333;        /* Dark text */
+            --text-secondary: #666666;      /* Medium grey text */
+            --border-radius: 10px;
+            --gradient-start: #4a4a4a;      /* Darker grey */
+            --gradient-mid: #666666;        /* Medium grey */
+            --gradient-end: #808080;        /* Light grey */
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            padding-bottom: 60px; /* Add padding for footer height */
+        }
+
+        .college-header {
+            background: linear-gradient(135deg, #1a2a3a 0%, #2c3e50 50%, #1a2a3a 100%);
+            padding: 1.5rem 0 1rem;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .college-header::after {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: radial-gradient(ellipse at center, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 70%);
+            transform: rotate(30deg);
+            pointer-events: none;
+        }
+
+        .college-header h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            letter-spacing: 10px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3), 0 0 10px rgba(52, 152, 219, 0.3);
+            margin-bottom: 0.2rem;
+            background: linear-gradient(135deg, #fff 10%, #e0e0e0 90%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            transform: perspective(500px) translateZ(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .college-header h1:hover {
+            transform: perspective(500px) translateZ(10px);
+        }
+
+        .college-header p {
+            font-size: 1.1rem;
+            font-style: italic;
+            letter-spacing: 1px;
+            margin-bottom: 1.2rem;
+            opacity: 0.95;
+            color: #e0e0e0;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .college-header p::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+        }
+
+        .college-info-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transform: translateY(0);
+            transition: all 0.3s ease;
+            flex-wrap: wrap;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+        
+        .college-info-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+            transform: rotate(-15deg);
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .college-info-card:hover::before {
+            opacity: 1;
+        }
+        
+        .college-info-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .college-info-card img {
+            height: 65px;
+            width: auto;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+            transform: rotate(0);
+            transition: all 0.5s ease;
+            border-radius: 50%;
+            padding: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .college-info-card:hover img {
+            transform: rotate(5deg) scale(1.05);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .college-info-card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.2rem;
+            font-weight: 600;
+            color: #ffffff;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+            letter-spacing: 0.5px;
+            text-align: center;
+            width: 100%;
+            transition: all 0.3s ease;
+            position: relative;
+            padding-bottom: 8px;
+        }
+        
+        .college-info-card h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+            transition: width 0.5s ease;
+        }
+        
+        .college-info-card:hover h2::after {
+            width: 80%;
+        }
+
+        .college-info-card p {
+            margin: 0;
+            font-size: 1rem;
+            opacity: 0.9;
+            font-weight: 300;
+            color: rgba(255,255,255,0.9);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .college-info-card:hover p {
+            opacity: 1;
+            letter-spacing: 1px;
+        }
+
+        .project-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin: 1rem 0;
+            text-align: center;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            position: relative;
+            display: inline-block;
+        }
+
+        .project-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #fff, transparent);
+        }
+
+        .motto {
+            font-style: italic;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+        }
+
+        .scanner-section {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(149, 165, 166, 0.2);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .scanner-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4a4a4a, #808080);
+        }
+
+        .scanner-section.scanning {
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transform: translateY(-3px);
+            border-color: rgba(52, 152, 219, 0.3);
+        }
+
+        .scan-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ff6b6b, transparent);
+            box-shadow: 0 0 8px rgba(255, 107, 107, 0.5);
+            opacity: 0;
+            z-index: 5;
+        }
+
+        .scanning .scan-line {
+            animation: scanAnimation 2s ease-in-out infinite;
+            opacity: 1;
+        }
+
+        @keyframes scanAnimation {
+            0% { top: 30%; opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { top: 70%; opacity: 1; }
+        }
+
+        .scanner-input {
+            position: relative;
+            margin-bottom: 0;
+            z-index: 10;
+        }
+
+        .barcode-input {
+            height: 65px;
+            font-size: 1.2rem;
+            border: 2px solid #ecf0f1;
+            border-radius: 12px 0 0 12px !important;
+            padding: 15px 20px;
+            background-color: #ffffff;
+            color: #2c3e50;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+        }
+
+        .barcode-input:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.25rem rgba(128, 128, 128, 0.25);
+            background: white;
+        }
+
+        .scan-button {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-mid));
+            border: none;
+            height: 65px;
+            padding: 0 30px;
+            border-radius: 0 12px 12px 0 !important;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .scan-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(74, 74, 74, 0.2);
+            background: linear-gradient(135deg, var(--gradient-mid), var(--gradient-start));
+        }
+
+        .scan-button:active, .scan-button:disabled {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        .scan-button i {
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .scanner-feedback {
+            min-height: 50px;
+            text-align: center;
+        }
+
+        .scanner-message {
+            padding: 10px 15px;
+            border-radius: 30px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            animation: message-fade-in 0.3s ease;
+        }
+
+        @keyframes message-fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .scanner-message.success {
+            background-color: rgba(40, 167, 69, 0.15);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+
+        .scanner-message.error {
+            background-color: rgba(220, 53, 69, 0.15);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+
+        .scanner-message.warning {
+            background-color: rgba(255, 193, 7, 0.15);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.2);
+        }
+
+        .scanner-message.info {
+            background-color: rgba(23, 162, 184, 0.15);
+            color: #17a2b8;
+            border: 1px solid rgba(23, 162, 184, 0.2);
+        }
+
+        .form-container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            border: 1px solid rgba(134, 198, 227, 0.2);
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #4a4a4a, #666666);
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            margin: 1.5rem 0;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-header i {
+            font-size: 1.2rem;
+        }
+
+        .form-label {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: var(--border-radius);
+            border: 2px solid #e9ecef;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #808080;
+            box-shadow: 0 0 0 0.2rem rgba(128, 128, 128, 0.25);
+            background-color: white;
+        }
+
+        .submit-container {
+            margin-top: 2.5rem;
+            text-align: center;
+            padding: 1rem;
+            background: var(--light-bg);
+            border-radius: var(--border-radius);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            padding: 1rem 3rem;
+            border-radius: var(--border-radius);
+            border: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-submit:hover {
+            background: linear-gradient(135deg, var(--gradient-end), var(--gradient-start));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4a4a4a, #666666);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            border: none;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover, .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            background: white;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, var(--success-color), #2ecc71);
+            color: white;
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, #4a4a4a, #666666);
+            color: white;
+        }
+
+        .error-box {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            color: white;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-top: 1rem;
+            display: none;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            border: none;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #4a4a4a, #666666, #808080);
+            color: white;
+            padding: 1.5rem;
+            border: none;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        /* Input group styling */
+        .input-group {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .input-group .form-control {
+            border: none;
+            box-shadow: none;
+        }
+
+        .input-group .btn {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #4a4a4a, #666666);
+            border: none;
+            color: white;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .college-title h1 {
+                font-size: 1.8rem;
+            }
+
+            .college-logo {
+                height: 70px;
+            }
+
+            .form-container {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Add hover effects for better interactivity */
+        .form-control:hover, .form-select:hover {
+            border-color: #808080;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(74, 74, 74, 0.2);
+        }
+
+        /* Add subtle animation to buttons */
+        .btn {
+            transition: all 0.3s ease;
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Add styles for readonly fields */
+        .form-control[readonly] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+
+        /* Add styles for invalid fields */
+        .is-invalid {
+            border-color: #ff6b6b !important;
+        }
+
+        .invalid-feedback {
+            color: #ff6b6b;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Add loading indicator styles */
+        .loading-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 10px;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .loading-indicator i {
+            font-size: 1.5rem;
+        }
+
+        /* Add success animation styles */
+        .success-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .success-checkmark {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+        }
+
+        .check-icon {
+            width: 80px;
+            height: 80px;
+            position: relative;
+            border-radius: 50%;
+            box-sizing: content-box;
+            border: 4px solid #4CAF50;
+        }
+
+        .check-icon::before {
+            top: 3px;
+            left: -2px;
+            width: 30px;
+            transform-origin: 100% 50%;
+            border-radius: 100px 0 0 100px;
+        }
+
+        .check-icon::after {
+            top: 0;
+            left: 30px;
+            width: 60px;
+            transform-origin: 0 50%;
+            border-radius: 0 100px 100px 0;
+            animation: rotate-circle 4.25s ease-in;
+        }
+
+        .check-icon .icon-line {
+            height: 5px;
+            background-color: #4CAF50;
+            display: block;
+            width: 0;
+            border-radius: 2px;
+            position: absolute;
+            z-index: 10;
+        }
+
+        .check-icon .icon-line.line-tip {
+            top: 46px;
+            left: 14px;
+            width: 25px;
+            transform: rotate(45deg);
+            animation: icon-line-tip 0.75s;
+        }
+
+        .check-icon .icon-line.line-long {
+            top: 38px;
+            right: 8px;
+            width: 47px;
+            transform: rotate(-45deg);
+            animation: icon-line-long 0.75s;
+        }
+
+        .check-icon .icon-circle {
+            top: -4px;
+            left: -4px;
+            z-index: 10;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            position: absolute;
+            box-sizing: content-box;
+            border: 4px solid rgba(76, 175, 80, 0.5);
+        }
+
+        .check-icon .icon-fix {
+            top: 8px;
+            width: 5px;
+            left: 26px;
+            z-index: 1;
+            height: 85px;
+            position: absolute;
+            transform: rotate(-45deg);
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .success-message {
+            color: white;
+            font-size: 1.5rem;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        @keyframes rotate-circle {
+            0% {
+                transform: rotate(-45deg);
+            }
+            5% {
+                transform: rotate(-45deg);
+            }
+            12% {
+                transform: rotate(-405deg);
+            }
+            100% {
+                transform: rotate(-405deg);
+            }
+        }
+
+        @keyframes icon-line-tip {
+            0% {
+                width: 0;
+                left: 1px;
+                top: 19px;
+            }
+            54% {
+                width: 0;
+                left: 1px;
+                top: 19px;
+            }
+            70% {
+                width: 50px;
+                left: -8px;
+                top: 37px;
+            }
+            84% {
+                width: 17px;
+                left: 21px;
+                top: 48px;
+            }
+            100% {
+                width: 25px;
+                left: 14px;
+                top: 46px;
+            }
+        }
+
+        @keyframes icon-line-long {
+            0% {
+                width: 0;
+                right: 46px;
+                top: 54px;
+            }
+            65% {
+                width: 0;
+                right: 46px;
+                top: 54px;
+            }
+            84% {
+                width: 55px;
+                right: 0px;
+                top: 35px;
+            }
+            100% {
+                width: 47px;
+                right: 8px;
+                top: 38px;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Excel Upload Modal Styles */
+        #drop-zone {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            box-shadow: 0 0 15px rgba(0,0,0,0.05);
+        }
+        
+        #drop-zone.dragover {
+            background: linear-gradient(135deg, #ebf8ff 0%, #e6f7ff 100%);
+            border-color: var(--primary-color) !important;
+            transform: scale(1.02);
+        }
+
+        .progress {
+            overflow: hidden;
+            background: #f0f0f0;
+            border-radius: 10px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .progress-bar {
+            transition: width 0.5s ease;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        }
+
+        #results-section .card {
+            transition: transform 0.3s ease;
+        }
+
+        #results-section .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .modal-content {
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #4a4a4a, #666666);
+            color: rgba(255, 255, 255, 0.9);
+            padding: 1rem 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .footer-content {
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        .footer .separator {
+            margin: 0 1rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .footer strong {
+            color: white;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .footer-content {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .footer .separator {
+                display: none;
+            }
+            
+            .footer span {
+                display: block;
+                margin: 0.25rem 0;
+            }
+        }
+
+        .upload-zone {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .upload-zone.dragover {
+            border-color: #4a4a4a;
+            background: #e9ecef;
+        }
+
+        .upload-prompt {
+            color: #666;
+        }
+
+        .selected-file {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: #e9ecef;
+            border-radius: 8px;
+            color: #4a4a4a;
+        }
+
+        .progress {
+            height: 20px;
+            border-radius: 10px;
+            background-color: #e9ecef;
+        }
+
+        .progress-bar {
+            background-color: #4a4a4a;
+            transition: width 0.3s ease;
+        }
+
+        .progress-status {
+            text-align: center;
+            color: #666;
+        }
+
+        .upload-results {
+            margin-top: 1rem;
+        }
+
+        .template-loading {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 1rem;
+            color: var(--primary-color);
+        }
+
+        .validation-details {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 1.5rem;
+        }
+
+        .comparison-table {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .upload-status {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .upload-details {
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .results-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUp 0.5s ease forwards;
+        }
+
+        .result-card.success {
+            border-left: 4px solid #28a745;
+        }
+
+        .result-card.error {
+            border-left: 4px solid #dc3545;
+        }
+
+        .result-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .result-card.success .result-icon {
+            color: #28a745;
+        }
+
+        .result-card.error .result-icon {
+            color: #dc3545;
+        }
+
+        .counter {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .highlight-form {
+            animation: highlight-pulse 1.5s ease;
+        }
+
+        @keyframes highlight-pulse {
+            0% { box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
+            50% { box-shadow: 0 10px 30px rgba(52, 152, 219, 0.3); }
+            100% { box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
+        }
+
+        /* Excel Upload Animation Styles */
+        .processing-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        
+        .processing-animation.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .processing-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .processing-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #4a4a4a, #666666, #4a4a4a);
+            background-size: 200% 100%;
+            animation: gradientMove 2s linear infinite;
+        }
+        
+        @keyframes gradientMove {
+            0% { background-position: 100% 0; }
+            100% { background-position: -100% 0; }
+        }
+        
+        .processing-spinner {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+        
+        .processing-spinner::before,
+        .processing-spinner::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .processing-spinner::before {
+            width: 100%;
+            height: 100%;
+            background: rgba(74, 74, 74, 0.2);
+            animation-delay: 0s;
+        }
+        
+        .processing-spinner::after {
+            width: 70%;
+            height: 70%;
+            background: rgba(102, 102, 102, 0.4);
+            top: 15%;
+            left: 15%;
+            animation-delay: 0.5s;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.5; }
+        }
+        
+        .processing-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 30px;
+            color: #4a4a4a;
+            animation: rotate 2s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        .processing-message {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .processing-details {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .processing-progress {
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        
+        .processing-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4a4a4a, #666666);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .processing-status {
+            font-size: 12px;
+            color: #888;
+        }
+        
+        .processing-complete {
+            display: none;
+        }
+        
+        .processing-complete.show {
+            display: block;
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        .success-checkmark {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+        
+        .check-icon {
+            width: 80px;
+            height: 80px;
+            position: relative;
+        }
+        
+        .check-icon .icon-circle {
+            width: 80px;
+            height: 80px;
+            position: absolute;
+            border-radius: 50%;
+            box-sizing: content-box;
+            border: 4px solid #4a4a4a;
+        }
+        
+        .check-icon .icon-line {
+            height: 5px;
+            background-color: #4a4a4a;
+            display: block;
+            border-radius: 2px;
+            position: absolute;
+            z-index: 10;
+        }
+        
+        .check-icon .icon-line.line-tip {
+            top: 46px;
+            left: 14px;
+            width: 25px;
+            transform: rotate(45deg);
+        }
+        
+        .check-icon .icon-line.line-long {
+            top: 36px;
+            left: 28px;
+            width: 47px;
+            transform: rotate(-45deg);
+        }
+        
+        .check-icon .icon-circle {
+            top: -4px;
+            left: -4px;
+            z-index: 10;
+            border: 4px solid #4a4a4a;
+        }
+        
+        .check-icon .icon-fix {
+            top: 8px;
+            width: 5px;
+            left: 26px;
+            z-index: 1;
+            height: 85px;
+            position: absolute;
+            transform: rotate(-45deg);
+            background-color: white;
+        }
+        
+        /* Upload Button Scroll Animation */
+        .upload-button-container {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-button-container.highlight {
+            animation: pulseHighlight 1.5s ease infinite;
+        }
+        
+        @keyframes pulseHighlight {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(74, 74, 74, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(74, 74, 74, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(74, 74, 74, 0); }
+        }
+        
+        .scroll-indicator {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .scroll-indicator.show {
+            opacity: 1;
+            animation: bounceIndicator 1.5s ease infinite;
+        }
+        
+        @keyframes bounceIndicator {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
+        }
+        
+        .scroll-indicator i {
+            font-size: 24px;
+            color: #4a4a4a;
+            margin-bottom: 5px;
+        }
+        
+        .scroll-indicator span {
+            font-size: 12px;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        /* Success Message Styles */
+        .success-message-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .success-message-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .success-message-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            position: relative;
+            max-width: 90%;
+            width: 400px;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .success-message-overlay.show .success-message-container {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .success-checkmark {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: checkmarkAppear 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes checkmarkAppear {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-checkmark i {
+            font-size: 40px;
+            color: #28a745;
+            opacity: 0;
+            transform: scale(0.5);
+            animation: iconAppear 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
+        }
+
+        @keyframes iconAppear {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 15px;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: textAppear 0.5s ease 0.4s forwards;
+        }
+
+        @keyframes textAppear {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Update Button Highlight */
+        .update-button-highlight {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .update-button-highlight::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
+            transform: rotate(45deg);
+            animation: highlightSweep 2s linear infinite;
+        }
+
+        @keyframes highlightSweep {
+            0% {
+                transform: rotate(45deg) translateY(0%);
+            }
+            100% {
+                transform: rotate(45deg) translateY(100%);
+            }
+        }
+
+        /* Scroll Indicator Improvements */
+        .scroll-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        /* Excel List Scroll Animation Styles */
+        .scroll-guide {
+            position: fixed;
+            right: 30px;
+            bottom: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .scroll-guide.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .scroll-guide-track {
+            width: 4px;
+            height: 100px;
+            background: rgba(74, 74, 74, 0.1);
+            border-radius: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scroll-guide-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(to bottom, #4a4a4a, #666666);
+            border-radius: 2px;
+            transition: height 0.8s ease;
+        }
+
+        .scroll-guide-icon {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulseIcon 2s infinite;
+        }
+
+        @keyframes pulseIcon {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(10px); }
+            100% { transform: translateY(0); }
+        }
+
+        .scroll-guide-icon i {
+            color: #4a4a4a;
+            font-size: 20px;
+        }
+
+        .scroll-guide-label {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #4a4a4a;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            white-space: nowrap;
+        }
+
+        .update-button-container {
+            position: relative;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .update-button-container.highlight {
+            background: rgba(74, 74, 74, 0.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .update-button-container.highlight::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(74, 74, 74, 0.1) 0%, transparent 70%);
+            animation: pulseBackground 2s infinite;
+        }
+
+        @keyframes pulseBackground {
+            0% { transform: scale(0.95); opacity: 0.5; }
+            50% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.5; }
+        }
+
+        .floating-action-button {
+            position: fixed;
+            right: 30px;
+            bottom: 30px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #4a4a4a;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transform: scale(0);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+        }
+
+        .floating-action-button.show {
+            transform: scale(1);
+        }
+
+        .floating-action-button:hover {
+            transform: scale(1.1);
+            background: #666666;
+        }
+
+        .floating-action-button i {
+            font-size: 24px;
+        }
+    </style>
+    <!-- Add Processing Animation HTML -->
+    <div class="processing-animation" id="processingAnimation">
+        <div class="processing-content">
+            <div class="processing-spinner">
+                <i class="fas fa-sync processing-icon"></i>
+            </div>
+            <h4 class="processing-message">Processing Excel Data</h4>
+            <p class="processing-details">Please wait while we validate and upload your data...</p>
+            <div class="processing-progress">
+                <div class="processing-progress-bar" id="processingProgressBar"></div>
+            </div>
+            <p class="processing-status" id="processingStatus">Initializing...</p>
+            
+            <div class="processing-complete" id="processingComplete">
+                <div class="success-checkmark">
+                    <div class="check-icon">
+                        <span class="icon-line line-tip"></span>
+                        <span class="icon-line line-long"></span>
+                        <span class="icon-circle"></span>
+                        <span class="icon-fix"></span>
+                    </div>
+                </div>
+                <h4 class="processing-message">Upload Complete!</h4>
+                <p class="processing-details" id="processingResult">Your data has been successfully processed.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Scroll Indicator -->
+    <div class="scroll-indicator" id="scrollIndicator">
+        <i class="fas fa-chevron-down"></i>
+        <span>Scroll to upload button</span>
+    </div>
+
+    <!-- Add Scroll Guide -->
+    <div class="scroll-guide" id="scrollGuide">
+        <div class="scroll-guide-icon">
+            <i class="fas fa-arrow-down"></i>
+        </div>
+        <div class="scroll-guide-track">
+            <div class="scroll-guide-progress" id="scrollProgress"></div>
+        </div>
+        <div class="scroll-guide-label">Scroll to Update</div>
+    </div>
+
+    <!-- Add Floating Action Button -->
+    <div class="floating-action-button" id="scrollToUpdateBtn" onclick="scrollToUpdate()">
+        <i class="fas fa-arrow-down"></i>
+    </div>
+</head>
+<body>
+    <header class="college-header">
+        <div class="container">
+            <div class="text-center text-white">
+                <h1>CHAKSHU</h1>
+                <p>Not just an eye, a vision</p>
+            </div>
+            <div class="college-info-card">
+                <img src="{{ url_for('static', filename='clglogo.png') }}" alt="College Logo">
+                <div class="text-white">
+                    <h2>Dr. B. B. Hegde First Grade College</h2>
+                    <p>Kundapura</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">
+                <i class="fas fa-user-plus"></i> New Student Registration
+            </h2>
+            <div>
+                <button type="button" class="btn btn-success me-2" id="uploadExcelBtn">
+                    <i class="fas fa-file-excel"></i> Bulk Upload
+                </button>
+                <a href="/manage" class="btn btn-primary">
+                    <i class="fas fa-users"></i> View All Students
+                </a>
+            </div>
+        </div>
+
+        <div class="scanner-section">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="scanner-input">
+                        <div class="scan-animation">
+                            <div class="scan-line"></div>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" class="form-control barcode-input" id="barcode" name="barcode" 
+                                   placeholder="Scan Student ID Barcode" autofocus>
+                            <button class="btn btn-primary scan-button" type="button" id="scanButton">
+                                <i class="fas fa-barcode"></i> Scan ID
+                            </button>
+                        </div>
+                        <div class="scanner-feedback mt-3" id="scannerFeedback"></div>
+                        <div class="text-center mt-2 text-muted">
+                            <small><i class="fas fa-info-circle"></i> Scan barcode or enter roll number to register student</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <div class="text-center mb-4">
+                <p class="text-muted">Fill in the student details below</p>
+            </div>
+
+            <form id="studentForm" onsubmit="return submitForm()" enctype="multipart/form-data">
+                <div class="section-header">
+                    <i class="fas fa-id-card"></i> Basic Information
+                </div>
+                
+                <!-- Profile Image Section -->
+                <div class="mb-3">
+                    <label for="profileImage" class="form-label">
+                        <i class="fas fa-user-circle"></i> Profile Picture
+                    </label>
+                    <div class="d-flex align-items-center">
+                        <div class="profile-preview-container me-3" style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa;">
+                            <img id="profilePreview" src="{{ url_for('static', filename='default.jpg') }}" alt="Profile Preview" style="max-width: 100%; max-height: 100%; object-fit: cover;">
+                        </div>
+                        <div class="flex-grow-1">
+                            <input type="file" class="form-control" id="profileImage" name="profileImage" accept="image/*" onchange="previewImage(this);">
+                            <div class="form-text">Upload student photo (jpg, png, jpeg). Will be renamed to student roll number.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="regNo" class="form-label">
+                            <i class="fas fa-registered"></i> Reg. No.
+                        </label>
+                        <input type="text" class="form-control" id="regNo" name="regNo">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="rollNo" class="form-label">Roll No.</label>
+                        <input type="text" class="form-control" id="rollNo" name="rollNo">
+                    </div>
+                </div>
+
+                <div class="section-header">
+                    <i class="fas fa-user"></i> Personal Details
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="studentName" class="form-label">
+                            <i class="fas fa-user"></i> Student Name
+                        </label>
+                        <input type="text" class="form-control" id="studentName" name="studentName">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="fatherName" class="form-label">
+                            <i class="fas fa-user-tie"></i> Father Name
+                        </label>
+                        <input type="text" class="form-control" id="fatherName" name="fatherName">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="classSection" class="form-label">Class/Section</label>
+                        <input type="text" class="form-control" id="classSection" name="classSection">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="gender" class="form-label">Gender</label>
+                        <select class="form-select" id="gender" name="gender">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="dob" class="form-label">Date of Birth</label>
+                        <input type="text" class="form-control" id="dob" name="dob"
+                               pattern="\d{2}-\d{2}-\d{4}" maxlength="10" placeholder="DD-MM-YYYY"
+                               title="Please enter date in DD-MM-YYYY format"
+                               oninput="formatDate(this)">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="address" class="form-label">Address</label>
+                    <textarea class="form-control" id="address" name="address" rows="3"></textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="studentContact" class="form-label">Student Contact No.</label>
+                        <input type="tel" class="form-control" id="studentContact" name="studentContact">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="parentNo" class="form-label">Parent Contact No.</label>
+                        <input type="tel" class="form-control" id="parentNo" name="parentNo">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="aadharNo" class="form-label">Student Aadhar No.</label>
+                    <input type="text" class="form-control" id="aadharNo" name="aadharNo"
+                           pattern="\d{10}" maxlength="10" placeholder="10-digit Aadhar number"
+                           title="Please enter a 10-digit Aadhar number"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)">
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="bloodGroup" class="form-label">Blood Group</label>
+                        <select class="form-select" id="bloodGroup" name="bloodGroup">
+                            <option value="">Select Blood Group</option>
+                            {% for group in ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'] %}
+                            <option value="{{ group }}">{{ group }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="state" class="form-label">State</label>
+                        <input type="text" class="form-control" id="state" name="state">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="district" class="form-label">District</label>
+                        <input type="text" class="form-control" id="district" name="district">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="religion" class="form-label">Religion</label>
+                        <input type="text" class="form-control" id="religion" name="religion">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="category" class="form-label">Category</label>
+                        <input type="text" class="form-control" id="category" name="category">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="caste" class="form-label">Caste</label>
+                        <input type="text" class="form-control" id="caste" name="caste">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="income" class="form-label">Income</label>
+                    <input type="number" class="form-control" id="income" name="income">
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="pucRollNo" class="form-label">PUC/Equivalent Roll No</label>
+                        <input type="text" class="form-control" id="pucRollNo" name="pucRollNo">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="pucYear" class="form-label">PUC/Equivalent Year of Completion</label>
+                        <input type="text" class="form-control" id="pucYear" name="pucYear">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="pucInstitute" class="form-label">PUC/Equivalent Institute Name</label>
+                    <input type="text" class="form-control" id="pucInstitute" name="pucInstitute">
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="pucTotalMarks" class="form-label">PUC/Equivalent Total Marks</label>
+                        <input type="number" class="form-control" id="pucTotalMarks" name="pucTotalMarks">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="pucObtainedMarks" class="form-label">PUC/Equivalent Obtained Marks</label>
+                        <input type="number" class="form-control" id="pucObtainedMarks" name="pucObtainedMarks">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="pucPercentage" class="form-label">PUC/Equivalent Percentage/CGPA</label>
+                        <input type="number" step="0.01" class="form-control" id="pucPercentage" name="pucPercentage">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="discipline1" class="form-label">Discipline 1</label>
+                        <input type="text" class="form-control" id="discipline1" name="discipline1">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="lang2" class="form-label">Lang 2</label>
+                        <input type="text" class="form-control" id="lang2" name="lang2">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="yearOfAdmission" class="form-label">Year of Admission</label>
+                        <input type="text" class="form-control" id="yearOfAdmission" name="yearOfAdmission">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="abcId" class="form-label">ABC ID</label>
+                        <input type="text" class="form-control" id="abcId" name="abcId">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="mailId" class="form-label">Mail ID provided by College</label>
+                        <input type="email" class="form-control" id="mailId" name="mailId">
+                    </div>
+                </div>
+
+                <div class="submit-container">
+                    <button type="submit" class="btn btn-submit">
+                        <i class="fas fa-save me-2"></i> Submit Registration
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Warning Modal -->
+    <div class="modal fade" id="warningModal" tabindex="-1" aria-labelledby="warningModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title" id="warningModalLabel">
+                        <i class="fas fa-exclamation-triangle"></i> Warning
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="warningMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Confirmation Modal -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success">
+                    <h5 class="modal-title" id="confirmationModalLabel">
+                        <i class="fas fa-check-circle"></i> Registration Confirmation
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="confirmation-icon text-center mb-4">
+                        <i class="fas fa-user-plus fa-4x text-success"></i>
+                    </div>
+                    <div id="confirmationMessage" class="text-center mb-3"></div>
+                    <div id="missingFieldsContainer" class="mt-3" style="display: none;">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i> <strong>Warning:</strong> The following fields are not filled:
+                        </div>
+                        <ul id="missingFieldsList" class="list-group list-group-flush"></ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="proceedButton">Register Student</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Excel Upload Modal -->
+    <div class="modal fade" id="excelUploadModal" tabindex="-1" aria-labelledby="excelUploadModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title" id="excelUploadModalLabel">
+                        <i class="fas fa-file-excel text-success"></i> Bulk Upload Student Data
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Template Download Section -->
+                    <div class="template-download mb-4">
+                        <a href="/download_template" class="btn btn-outline-success">
+                            <i class="fas fa-file-download"></i> Download Template
+                        </a>
+                        <small class="text-muted d-block mt-2">Download the Excel template with required headers</small>
+                    </div>
+                    <div class="upload-zone" id="uploadZone">
+                        <div class="upload-prompt">
+                            <i class="fas fa-file-excel fa-3x mb-3"></i>
+                            <h4>Drag & Drop Excel File Here</h4>
+                            <p>or</p>
+                            <input type="file" id="fileInput" accept=".xlsx" style="display: none;">
+                            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                                <i class="fas fa-folder-open me-2"></i>Browse Files
+                            </button>
+                        </div>
+                        <div class="selected-file" style="display: none;">
+                            <i class="fas fa-file-excel me-2"></i>
+                            <span id="selectedFileName"></span>
+                        </div>
+                    </div>
+
+                    <!-- Validation Results -->
+                    <div id="validationResults" class="mt-4" style="display: none;">
+                        <h6><i class="fas fa-check-circle"></i> Validation Results</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6>Valid Records</h6>
+                                        <h3 id="validCount" class="text-success">0</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6>Existing Students</h6>
+                                        <h3 id="existingCount" class="text-warning">0</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6>Invalid Records</h6>
+                                        <h3 id="invalidCount" class="text-danger">0</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    <div class="progress-section mt-4" style="display: none;">
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                    </div>
+                        <div class="progress-status mt-2"></div>
+                </div>
+                    <div class="upload-results mt-4" style="display: none;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="uploadButton" disabled>
+                        <i class="fas fa-upload me-2"></i>Upload
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add these scripts before the closing body tag -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="/static/js/notifications.js"></script>
+    <script src="/static/js/search.js"></script>
+    <script src="/static/js/excel_upload.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Create modal instance
+        const warningModal = new bootstrap.Modal(document.getElementById('warningModal'));
+        const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+        const excelUploadModal = new bootstrap.Modal(document.getElementById('excelUploadModal'));
+
+        // Add event listener for modal close
+        document.getElementById('excelUploadModal').addEventListener('hidden.bs.modal', function () {
+            resetUpload();
+        });
+
+        // Excel Upload Modal Handling
+        const uploadExcelBtn = document.getElementById('uploadExcelBtn');
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const uploadButton = document.getElementById('uploadButton');
+        const selectedFileName = document.getElementById('selectedFileName');
+        const progressSection = document.querySelector('.progress-section');
+        const progressBar = document.querySelector('.progress-bar');
+        const progressStatus = document.querySelector('.progress-status');
+        const uploadResults = document.querySelector('.upload-results');
+        const validationResults = document.getElementById('validationResults');
+        const selectedFileDisplay = document.querySelector('.selected-file');
+        const uploadPrompt = document.querySelector('.upload-prompt');
+
+        function resetUpload() {
+            // Reset file input
+            fileInput.value = '';
+            
+            // Reset selected file display
+            selectedFileDisplay.style.display = 'none';
+            
+            // Show upload prompt again
+            uploadPrompt.style.display = 'block';
+            
+            // Reset upload button
+            uploadButton.disabled = true;
+            uploadButton.style.display = 'block';
+            
+            // Clear validation results
+            validationResults.style.display = 'none';
+            validationResults.innerHTML = '';
+            
+            // Reset progress section
+            progressSection.style.display = 'none';
+            
+            // Reset progress bar
+            progressBar.style.width = '0%';
+            progressBar.classList.remove('bg-danger', 'bg-success');
+            
+            // Reset progress status
+            progressStatus.textContent = '';
+            
+            // Reset upload results
+            uploadResults.style.display = 'none';
+            uploadResults.innerHTML = '';
+        }
+
+        uploadExcelBtn.addEventListener('click', () => {
+            excelUploadModal.show();
+        });
+
+        // Drag and drop handlers
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            handleFileSelection(file);
+        });
+
+        // File input change handler
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            handleFileSelection(file);
+        });
+
+        // Handle file selection
+        function handleFileSelection(file) {
+            if (file && file.name.endsWith('.xlsx')) {
+                selectedFile = file;
+                document.querySelector('.upload-prompt').style.display = 'none';
+                document.querySelector('.selected-file').style.display = 'flex';
+                selectedFileName.textContent = file.name;
+                uploadButton.disabled = false;
+
+                // Read and validate file
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
+                    
+                    // Validate data
+                    validateData(jsonData);
+                };
+                reader.readAsArrayBuffer(file);
+            } else {
+                alert('Please select a valid Excel (.xlsx) file');
+                resetUpload();
+            }
+        }
+
+        function validateData(data) {
+            const headers = data[0];
+            const rows = data.slice(1);
+            let validCount = 0;
+            let existingCount = 0;
+            let invalidCount = 0;
+            let processedCount = 0;
+            const totalRows = rows.length;
+            
+            // Reset validation display
+            document.getElementById('validationResults').style.display = 'block';
+            document.getElementById('validCount').textContent = '0';
+            document.getElementById('existingCount').textContent = '0';
+            document.getElementById('invalidCount').textContent = '0';
+
+            // Create simplified validation table
+            const validationDetails = document.createElement('div');
+            validationDetails.className = 'validation-details mt-4';
+            validationDetails.innerHTML = `
+                <h6><i class="fas fa-list-check"></i> Data Validation Results</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Row</th>
+                                <th>Roll No</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="validationTableBody"></tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('validationResults').appendChild(validationDetails);
+
+            // Process each row
+            rows.forEach((row, index) => {
+                const rowNum = index + 2; // Account for header row
+                const rollNo = row[headers.indexOf('Roll No')];
+                
+                if (rollNo) {
+                    fetch('/check_duplicate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ rollNo })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        const tableBody = document.getElementById('validationTableBody');
+                        const row = document.createElement('tr');
+                        
+                        if (data.isDuplicate) {
+                            existingCount++;
+                            row.innerHTML = `
+                                <td>${rowNum}</td>
+                                <td>${rollNo}</td>
+                                <td><span class="badge bg-warning">Existing</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary compare-btn" 
+                                            onclick="compareStudentData('${rollNo}', ${index})">
+                                        <i class="fas fa-code-compare"></i> Compare & Update
+                                    </button>
+                                </td>
+                            `;
+                        } else {
+                            validCount++;
+                            row.innerHTML = `
+                                <td>${rowNum}</td>
+                                <td>${rollNo}</td>
+                                <td><span class="badge bg-success">Valid</span></td>
+                                <td>Ready to upload</td>
+                            `;
+                        }
+                        tableBody.appendChild(row);
+                        
+                        processedCount++;
+                        updateValidationCounts(validCount, existingCount, invalidCount);
+                        uploadButton.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error('Error checking duplicate:', error);
+                        const tableBody = document.getElementById('validationTableBody');
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${rowNum}</td>
+                            <td>${rollNo || 'Missing'}</td>
+                            <td><span class="badge bg-danger">Error</span></td>
+                            <td>Try again</td>
+                        `;
+                        tableBody.appendChild(row);
+                        invalidCount++;
+                        updateValidationCounts(validCount, existingCount, invalidCount);
+                    });
+                }
+            });
+        }
+
+        function showMissingFieldsSummary(missingFieldsSummary) {
+            const warningModal = document.createElement('div');
+            warningModal.className = 'modal fade';
+            warningModal.id = 'missingFieldsSummaryModal';
+            warningModal.innerHTML = `
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-warning text-white">
+                            <h5 class="modal-title">
+                                <i class="fas fa-exclamation-triangle"></i> Data Quality Summary
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            ${missingFieldsSummary.required.size > 0 ? `
+                                <div class="alert alert-danger mb-3">
+                                    <i class="fas fa-times-circle"></i> 
+                                    <strong>Critical Fields Missing:</strong>
+                                    <ul class="mb-0 mt-2">
+                                        ${Array.from(missingFieldsSummary.required).map(field => `
+                                            <li><i class="fas fa-circle text-danger"></i> ${field}</li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                            
+                            ${missingFieldsSummary.optional.size > 0 ? `
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i> 
+                                    <strong>Optional Fields Missing:</strong>
+                                    <ul class="mb-0 mt-2">
+                                        ${Array.from(missingFieldsSummary.optional).map(field => `
+                                            <li><i class="fas fa-circle text-warning"></i> ${field}</li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                            
+                            <div class="alert alert-info mt-3">
+                                <i class="fas fa-lightbulb"></i> 
+                                <strong>Tip:</strong> You can still proceed with the upload. Missing optional fields can be updated later.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                                <i class="fas fa-check"></i> I Understand
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(warningModal);
+            const modal = new bootstrap.Modal(warningModal);
+            modal.show();
+        }
+
+        function updateValidationCounts(valid, existing, invalid) {
+            document.getElementById('validCount').textContent = valid;
+            document.getElementById('existingCount').textContent = existing;
+            document.getElementById('invalidCount').textContent = invalid;
+        }
+
+        // Update the upload button click handler
+        uploadButton.addEventListener('click', () => {
+            if (!selectedFile) {
+                showNotification('Please select a file first', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            // Show processing animation
+            const processingAnimation = document.getElementById('processingAnimation');
+            const processingProgressBar = document.getElementById('processingProgressBar');
+            const processingStatus = document.getElementById('processingStatus');
+            const processingComplete = document.getElementById('processingComplete');
+            const processingResult = document.getElementById('processingResult');
+            
+            processingAnimation.classList.add('show');
+            processingProgressBar.style.width = '0%';
+            processingStatus.textContent = 'Initializing...';
+            processingComplete.classList.remove('show');
+
+            // Simulate progress updates
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                if (progress < 90) {
+                    progress += Math.random() * 15;
+                    if (progress > 90) progress = 90;
+                    processingProgressBar.style.width = `${progress}%`;
+                    
+                    if (progress < 30) {
+                        processingStatus.textContent = 'Validating data...';
+                    } else if (progress < 60) {
+                        processingStatus.textContent = 'Processing records...';
+                    } else {
+                        processingStatus.textContent = 'Finalizing upload...';
+                    }
+                }
+            }, 300);
+
+            // Upload the file
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(result => {
+                // Clear progress interval
+                clearInterval(progressInterval);
+                
+                // Complete the progress bar
+                processingProgressBar.style.width = '100%';
+                processingStatus.textContent = 'Complete!';
+                
+                // Show success animation
+                setTimeout(() => {
+                    processingComplete.classList.add('show');
+                    
+                    // Update result message based on the response
+                    if (result.success) {
+                        processingResult.textContent = `Successfully processed ${result.stats?.total || 0} records.`;
+                        processingResult.innerHTML += `<br><span class="text-success">${result.stats?.success || 0} successful, ${result.stats?.errors || 0} errors</span>`;
+                    } else {
+                        processingResult.textContent = `Error: ${result.error || 'Unknown error occurred'}`;
+                        processingResult.classList.add('text-danger');
+                    }
+                    
+                    // Auto-close after 3 seconds
+                    setTimeout(() => {
+                        processingAnimation.classList.remove('show');
+                        excelUploadModal.hide();
+                        
+                        // Show notification
+                        if (result.success) {
+                            showNotification(`Excel upload complete: ${result.stats?.success || 0} records processed successfully`, 'success');
+                            
+                            // Add highlight to upload button and scroll to it
+                            const uploadButtonContainer = document.querySelector('.upload-button-container');
+                            if (uploadButtonContainer) {
+                                uploadButtonContainer.classList.add('highlight');
+                                
+                                // Show scroll indicator
+                                const scrollIndicator = document.getElementById('scrollIndicator');
+                                if (scrollIndicator) {
+                                    scrollIndicator.classList.add('show');
+                                }
+                                
+                                // Scroll to upload button with smooth animation
+                                setTimeout(() => {
+                                    uploadButton.scrollIntoView({ 
+                                        behavior: 'smooth', 
+                                        block: 'center'
+                                    });
+                                    
+                                    // Hide scroll indicator after scrolling
+                                    setTimeout(() => {
+                                        if (scrollIndicator) {
+                                            scrollIndicator.classList.remove('show');
+                                        }
+                                    }, 2000);
+                                }, 500);
+                            }
+                        } else {
+                            showNotification(`Error: ${result.error || 'Unknown error occurred'}`, 'error');
+                        }
+                    }, 3000);
+                }, 1000);
+            })
+            .catch(error => {
+                // Clear progress interval
+                clearInterval(progressInterval);
+                
+                // Show error
+                processingProgressBar.style.width = '100%';
+                processingProgressBar.style.background = 'linear-gradient(90deg, #dc3545, #c82333)';
+                processingStatus.textContent = 'Error!';
+                
+                // Show error animation
+                setTimeout(() => {
+                    processingComplete.classList.add('show');
+                    processingResult.textContent = `Error: ${error.message || 'Network error occurred'}`;
+                    processingResult.classList.add('text-danger');
+                    
+                    // Auto-close after 3 seconds
+                    setTimeout(() => {
+                        processingAnimation.classList.remove('show');
+                        showNotification(`Error: ${error.message || 'Network error occurred'}`, 'error');
+                    }, 3000);
+                }, 1000);
+            });
+        });
+
+        // Add this code after the existing script
+        document.getElementById('downloadTemplate').addEventListener('click', function() {
+            try {
+                // Show loading animation
+                const loadingEl = document.createElement('div');
+                loadingEl.className = 'template-loading';
+                loadingEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing template...';
+                this.parentNode.appendChild(loadingEl);
+                this.disabled = true;
+
+                // Create workbook with styling
+                const wb = XLSX.utils.book_new();
+                
+                // Define headers with descriptions
+                const headers = [
+                    // Basic Info
+                    { name: 'College Name', required: true, description: 'Name of the college' },
+                    { name: 'Roll No', required: true, description: 'Unique student ID' },
+                    { name: 'Reg No', required: true, description: 'Registration number' },
+                    { name: 'Section', required: true, description: 'Class and section' },
+                    { name: 'Student Name', required: true, description: 'Full name of student' },
+                    { name: 'Father Name', required: true, description: 'Father\'s full name' },
+                    { name: 'Gender', required: true, description: 'Male/Female/Other' },
+                    { name: 'Date of Birth', required: true, description: 'DD-MM-YYYY' },
+                    
+                    // Contact Info
+                    { name: 'Email', required: true, description: 'Valid email address' },
+                    { name: 'Address', required: true, description: 'Full address' },
+                    { name: 'Contact No', required: true, description: '10-digit number' },
+                    { name: 'Parent Contact', required: true, description: '10-digit number' },
+                    
+                    // Personal Info
+                    { name: 'Aadhar No', required: true, description: '12-digit number' },
+                    { name: 'Blood Group', required: false, description: 'A+/A-/B+/B-/O+/O-/AB+/AB-' },
+                    { name: 'State', required: false, description: 'State name' },
+                    { name: 'District', required: false, description: 'District name' },
+                    { name: 'Religion', required: false, description: 'Religion' },
+                    { name: 'Category', required: false, description: 'Category' },
+                    { name: 'Caste', required: false, description: 'Caste' },
+                    { name: 'Income', required: false, description: 'Annual income' },
+                    { name: 'Category Applied', required: false, description: 'Category applied for' },
+                    
+                    // PUC Details
+                    { name: 'PUC/Equivalent Roll No', required: false, description: 'PUC roll number' },
+                    { name: 'PUC/Equivalent Year of Completion', required: false, description: 'Year of completion' },
+                    { name: 'PUC/Equivalent Institute Name', required: false, description: 'Institute name' },
+                    { name: 'PUC/Equivalent Total Marks', required: false, description: 'Total marks' },
+                    { name: 'PUC/Equivalent Obtained Marks', required: false, description: 'Marks obtained' },
+                    { name: 'PUC/Equivalent Percentage/CGPA', required: false, description: 'Percentage or CGPA' },
+                    
+                   
+                    
+                    // Program Details
+                    { name: 'Program Name', required: false, description: 'Name of the program' },
+                    { name: 'Discipline 1', required: false, description: 'Primary discipline' },
+                    { name: 'Language2', required: false, description: 'Second language' },
+                    
+                    // ABC ID Details
+                    { name: 'ABC ID', required: false, description: 'ABC ID number' },
+                ];
+
+                // Create header row with styling
+                const headerRow = headers.map(h => h.name);
+                const ws = XLSX.utils.aoa_to_sheet([headerRow]);
+
+                // Add validation and comments
+                headers.forEach((header, idx) => {
+                    const cell = XLSX.utils.encode_cell({ r: 0, c: idx });
+                    if (!ws[cell].c) ws[cell].c = [];
+                    ws[cell].c.push({ t: header.description });
+                    
+                    // Add validation where needed
+                    if (header.name === 'Gender') {
+                        ws[cell].v = { type: 'list', values: ['Male', 'Female', 'Other'] };
+                    } else if (header.name === 'Blood Group') {
+                        ws[cell].v = { type: 'list', values: ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'] };
+                    }
+                });
+
+                // Add sample data
+               
+                // Add sample data to worksheet
+                sampleData.forEach((row, idx) => {
+                    XLSX.utils.sheet_add_aoa(ws, [row], { origin: idx + 1 });
+                });
+
+                // Add the worksheet to workbook
+                XLSX.utils.book_append_sheet(wb, ws, 'Student Data');
+
+                // Download with animation
+                setTimeout(() => {
+                    XLSX.writeFile(wb, 'student_template.xlsx');
+                    loadingEl.remove();
+                    this.disabled = false;
+                    
+                    // Show success message
+                    showNotification('Template downloaded successfully!', 'success');
+                }, 1000);
+            } catch (error) {
+                console.error('Error creating template:', error);
+                showNotification('Error creating template', 'error');
+            }
+        });
+
+        // Function to compare student data
+        function compareStudentData(rollNo, excelRowIndex) {
+            if (!selectedFile) {
+                showNotification('No file selected', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    // Read Excel data
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const excelData = XLSX.utils.sheet_to_json(firstSheet)[excelRowIndex];
+
+                    if (!excelData) {
+                        throw new Error('No data found in Excel row');
+                    }
+
+                    // Get database student data
+                    const response = await fetch(`/get_student_details/${rollNo}`);
+                    const dbStudent = await response.json();
+
+                    if (!dbStudent || dbStudent.error) {
+                        throw new Error(dbStudent?.error || 'Student not found');
+                    }
+
+                    // Map Excel column names to database field names
+                    const fieldMapping = {
+                        'College Name': 'collegeName',
+                        'Roll No': 'rollNo',
+                        'Reg No': 'regNo',
+                        'Section': 'classSection',
+                        'Student Name': 'studentName',
+                        'Father Name': 'fatherName',
+                        'Gender': 'gender',
+                        'Date of Birth': 'dob',
+                        'Email': 'email',
+                        'Address': 'address',
+                        'Student Contact': 'studentContact',
+                        'Parent Contact': 'parentNo',
+                        'Aadhar No': 'aadharNo',
+                        'Blood Group': 'bloodGroup',
+                        'State': 'state',
+                        'District': 'district',
+                        'Religion': 'religion',
+                        'Category': 'category',
+                        'Caste': 'caste',
+                        'Income': 'income',
+                        'Category Applied': 'categoryApplied',
+                        'PUC/Equivalent Roll No': 'pucRollNo',
+                        'PUC/Equivalent Year of Completion': 'pucYear',
+                        'PUC/Equivalent Institute Name': 'pucInstitute',
+                        'PUC/Equivalent Total Marks': 'pucTotalMarks',
+                        'PUC/Equivalent Obtained Marks': 'pucObtainedMarks',
+                        'PUC/Equivalent Percentage/CGPA': 'pucPercentage',
+                        'Program Name': 'programName',
+                        'Discipline 1': 'discipline1',
+                        'Language2': 'lang2',
+                        'ABC ID': 'abcId'
+                    };
+
+                    // Check for differences
+                    const differences = {};
+                    let hasDifferences = false;
+
+                    for (const [excelField, dbField] of Object.entries(fieldMapping)) {
+                        const excelValue = excelData[excelField]?.toString().trim() || '';
+                        const dbValue = dbStudent[dbField]?.toString().trim() || '';
+                        
+                        // Show all fields, not just differences
+                        differences[dbField] = {
+                            excel: excelValue,
+                            db: dbValue
+                        };
+                        hasDifferences = true;
+                    }
+
+                    // Create comparison modal
+                    const modal = createComparisonModal(rollNo);
+                    document.body.appendChild(modal);
+                    const comparisonModal = new bootstrap.Modal(modal);
+
+                    // Fill comparison table
+                    const tbody = document.getElementById('comparisonTableBody');
+                    tbody.innerHTML = '';
+
+                    for (const [dbField, values] of Object.entries(differences)) {
+                        const excelField = Object.entries(fieldMapping).find(([_, field]) => field === dbField)?.[0] || dbField;
+                        addComparisonRow(tbody, excelField, values.db, values.excel, dbField);
+                    }
+
+                    setupSelectAllFunctionality();
+                    comparisonModal.show();
+                } catch (error) {
+                    console.error('Error in compareStudentData:', error);
+                    showNotification(error.message || 'Error comparing student data', 'error');
+                }
+            };
+
+            reader.readAsArrayBuffer(selectedFile);
+        }
+
+        // Helper function to normalize values for comparison
+        function normalizeValue(value) {
+            if (value === null || value === undefined) return '';
+            return value.toString().trim();
+        }
+
+        // Helper function to create comparison modal
+        function createComparisonModal(rollNo) {
+                        const modal = document.createElement('div');
+                        modal.className = 'modal fade';
+                        modal.id = 'compareModal';
+                        modal.innerHTML = `
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title">
+                                            <i class="fas fa-code-compare"></i> Compare & Update Student Data
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle"></i> The following fields have different values. Select the fields you want to update.
+                                        </div>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="selectAllFields" checked>
+                                            <label class="form-check-label" for="selectAllFields">
+                                                Select All Fields to Update
+                                            </label>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Field</th>
+                                                        <th>Current Value</th>
+                                                        <th>New Value</th>
+                                                        <th>Update?</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="comparisonTableBody"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="button" class="btn btn-primary" onclick="updateStudentData('${rollNo}')">
+                                            <i class="fas fa-save"></i> Update Selected Fields
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+            return modal;
+        }
+
+        // Helper function to add a comparison row
+        function addComparisonRow(tbody, excelField, dbValue, excelValue, dbField) {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `
+                                    <td>${excelField}</td>
+                                    <td>${dbValue || 'Empty'}</td>
+                <td id="excel-${dbField}">${excelValue || 'Empty'}</td>
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input field-checkbox" type="checkbox" value="${dbField}" checked>
+                                        </div>
+                                    </td>
+                                `;
+                                tbody.appendChild(tr);
+                            }
+
+        // Helper function to show no differences message
+        function showNoDifferencesMessage(tbody) {
+                            tbody.innerHTML = `
+                                <tr>
+                                    <td colspan="4" class="text-center text-success">
+                                        <i class="fas fa-check-circle"></i> No differences found. All data is up to date.
+                                    </td>
+                                </tr>
+                            `;
+                            document.querySelector('.modal-footer .btn-primary').style.display = 'none';
+                        }
+                        
+        // Helper function to setup select all functionality
+        function setupSelectAllFunctionality() {
+            const selectAllCheckbox = document.getElementById('selectAllFields');
+            const updateCheckboxes = document.querySelectorAll('.field-checkbox');
+            
+            selectAllCheckbox.addEventListener('change', function() {
+                updateCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+            });
+        }
+
+        // Function to update student data
+        async function updateStudentData(studentId) {
+            try {
+                const checkedFields = Array.from(document.querySelectorAll('.field-checkbox:checked'))
+                    .map(checkbox => checkbox.value);
+                
+                if (checkedFields.length === 0) {
+                    showNotification('Please select at least one field to update', 'warning');
+                    return;
+                }
+
+                const updateData = {};
+                checkedFields.forEach(field => {
+                    if (field === 'rollNo' || field === 'barcode') return;
+                    const value = document.getElementById(`excel-${field}`).textContent;
+                    updateData[field] = value === 'Empty' ? '' : value.trim();
+                });
+
+                if (Object.keys(updateData).length === 0) {
+                    showNotification('No valid data to update', 'warning');
+                    return;
+                }
+
+                // Show loading indicator
+                const loadingIndicator = document.createElement('div');
+                loadingIndicator.className = 'loading-indicator';
+                loadingIndicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating student data...';
+                document.body.appendChild(loadingIndicator);
+
+                // Send update request
+                const response = await fetch(`/edit_student/${studentId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                });
+
+                const result = await response.json();
+                loadingIndicator.remove();
+                
+                if (result.success) {
+                    showNotification('Student data updated successfully!', 'success');
+                    
+                    // Close and remove modal
+                    const compareModal = bootstrap.Modal.getInstance(document.getElementById('compareModal'));
+                    compareModal.hide();
+                    document.getElementById('compareModal').remove();
+                    
+                    // Update validation table
+                    const tableBody = document.getElementById('validationTableBody');
+                    const rows = tableBody.getElementsByTagName('tr');
+                    for (let row of rows) {
+                        if (row.cells[1].textContent === studentId) {
+                            row.innerHTML = `
+                                <td>${row.cells[0].textContent}</td>
+                                <td>${studentId}</td>
+                                <td><span class="badge bg-success">Up to Date</span></td>
+                                <td>No changes needed</td>
+                            `;
+                            break;
+                        }
+                    }
+                } else {
+                    throw new Error(result.error || 'Failed to update student data');
+                }
+            } catch (error) {
+                console.error('Error updating student:', error);
+                showNotification(error.message || 'An error occurred while updating student data', 'error');
+            }
+        }
+
+        // Add notification function
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 
+                               type === 'error' ? 'fa-exclamation-circle' : 
+                               'fa-info-circle'}"></i>
+                ${message}
+            `;
+            
+            // Add to body
+            document.body.appendChild(notification);
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
+
+        // Add this function to handle form submission
+        function submitForm() {
+            const form = document.getElementById('studentForm');
+            const formData = new FormData(form);
+            const rollNo = formData.get('rollNo');
+            
+            if (!rollNo) {
+                showNotification('Roll number is required', 'error');
+                return false;
+            }
+            
+            // Show loading indicator
+            const loadingIndicator = document.createElement('div');
+            loadingIndicator.className = 'loading-indicator';
+            loadingIndicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            document.body.appendChild(loadingIndicator);
+            
+            // First check if student exists
+            fetch('/check_duplicate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rollNo: rollNo })
+            })
+            .then(response => response.json())
+            .then(result => {
+                // Remove loading indicator
+                loadingIndicator.remove();
+                
+                if (result.isDuplicate) {
+                    // Create confirm dialog with more detail
+                    const confirmDialog = document.createElement('div');
+                    confirmDialog.className = 'modal fade';
+                    confirmDialog.id = 'studentExistsModal';
+                    confirmDialog.setAttribute('tabindex', '-1');
+                    confirmDialog.innerHTML = `
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header bg-warning">
+                                    <h5 class="modal-title">
+                                        <i class="fas fa-exclamation-triangle"></i> Student Already Exists
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>${result.message}</p>
+                                    <p>Do you want to update the existing student record?</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-primary" id="updateExistingBtn">
+                                        <i class="fas fa-save"></i> Update Existing Student
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(confirmDialog);
+                    
+                    const modal = new bootstrap.Modal(confirmDialog);
+                    modal.show();
+                    
+                    // Handle update button click
+                    document.getElementById('updateExistingBtn').addEventListener('click', function() {
+                        modal.hide();
+                        
+                        // Show loading again
+                        document.body.appendChild(loadingIndicator);
+                        
+                        // Convert FormData to JSON object
+                        const studentData = {};
+                        for (const [key, value] of formData.entries()) {
+                            studentData[key] = value;
+                        }
+                        
+                        // Update existing student
+                        fetch(`/edit_student/${rollNo}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(studentData)
+                        })
+                        .then(response => response.json())
+                        .then(result => {
+                            loadingIndicator.remove();
+                            
+                            if (result.success) {
+                                showNotification('Student data updated successfully!', 'success');
+                                setTimeout(() => {
+                                    window.location.href = '/manage';
+                                }, 2000);
+                            } else {
+                                showNotification(`Error: ${result.error}`, 'error');
+                            }
+                        })
+                        .catch(error => {
+                            loadingIndicator.remove();
+                            showNotification(`Error: ${error.message}`, 'error');
+                        });
+                    });
+                } else {
+                    // Submit as normal for new student
+                    document.body.appendChild(loadingIndicator);
+                    
+                    // Submit with form data (includes file upload)
+                    fetch('/submit', {
+                        method: 'POST',
+                        body: formData // This includes file data
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        loadingIndicator.remove();
+                        
+                        if (result.success) {
+                            showNotification('Student data saved successfully!', 'success');
+                            setTimeout(() => {
+                                window.location.href = '/manage';
+                            }, 2000);
+                        } else {
+                            showNotification(`Error: ${result.error}`, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        loadingIndicator.remove();
+                        showNotification(`Error: ${error.message}`, 'error');
+                    });
+                }
+            })
+            .catch(error => {
+                loadingIndicator.remove();
+                showNotification(`Error: ${error.message}`, 'error');
+            });
+            
+            return false; // Prevent form submission
+        }
+
+        // Make sure the form uses this function
+        document.getElementById('studentForm').onsubmit = submitForm;
+
+        // Add scanner functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const barcodeInput = document.getElementById('barcode');
+            const scanButton = document.getElementById('scanButton');
+            const scannerFeedback = document.getElementById('scannerFeedback');
+            const scannerSection = document.querySelector('.scanner-section');
+            const rollNoInput = document.getElementById('rollNo');
+            
+            console.log("DOM fully loaded");
+            console.log("Barcode input element:", barcodeInput);
+            console.log("Roll number input element:", rollNoInput);
+            
+            if (barcodeInput) {
+                // Focus on barcode input when the page loads
+                setTimeout(() => barcodeInput.focus(), 500);
+                
+                // Activate scanning animation when input is focused
+                barcodeInput.addEventListener('focus', function() {
+                    scannerSection.classList.add('scanning');
+                });
+                
+                barcodeInput.addEventListener('blur', function() {
+                    scannerSection.classList.remove('scanning');
+                });
+                
+                // Handle barcode input changes
+                barcodeInput.addEventListener('input', function() {
+                    // As user types in barcode, populate roll number field automatically
+                    const barcode = this.value.trim();
+                    if (barcode) {
+                        // Use both approaches to ensure it works
+                        document.getElementById('rollNo').value = barcode;
+                        if (rollNoInput) {
+                            rollNoInput.value = barcode;
+                            console.log("Updated roll number from barcode input:", barcode);
+                        } else {
+                            console.log("rollNoInput not found, using direct approach");
+                        }
+                    }
+                });
+                
+                // Handle barcode input enter key
+                barcodeInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const barcode = this.value.trim();
+                        if (barcode) {
+                            // Make sure roll number is set before processing
+                            document.getElementById('rollNo').value = barcode;
+                            if (rollNoInput) rollNoInput.value = barcode;
+                            console.log("Enter key pressed, setting roll number to:", barcode);
+                            processBarcode(barcode);
+                        }
+                    }
+                });
+                
+                // Handle scan button click
+                scanButton.addEventListener('click', function() {
+                    const barcode = barcodeInput.value.trim();
+                    if (barcode) {
+                        processBarcode(barcode);
+                    } else {
+                        barcodeInput.focus();
+                        showScannerFeedback('Please enter a barcode/ID', 'warning');
+                    }
+                });
+            }
+            
+            // Process barcode function
+            function processBarcode(barcode) {
+                // Show loading state
+                scanButton.disabled = true;
+                scanButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                showScannerFeedback('Searching for student...', 'info');
+                
+                // Populate roll number field and ensure it's updated
+                document.getElementById('rollNo').value = barcode;
+                rollNoInput.value = barcode;
+                console.log("Setting roll number to:", barcode);
+                
+                // Make API call to search for student
+                fetch('/search_barcode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ barcode: barcode }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Reset button state
+                    scanButton.disabled = false;
+                    scanButton.innerHTML = '<i class="fas fa-barcode"></i> Scan ID';
+                    
+                    if (data.error) {
+                        // Student not found - continue with registration
+                        showScannerFeedback(`No student found with this ID. You can register them now.`, 'info');
+                        // Add a highlight animation to the form
+                        document.querySelector('.form-container').classList.add('highlight-form');
+                        setTimeout(() => {
+                            document.querySelector('.form-container').classList.remove('highlight-form');
+                        }, 2000);
+                        
+                        // Scroll to registration form smoothly
+                        setTimeout(() => {
+                            document.querySelector('.form-container').scrollIntoView({ 
+                                behavior: 'smooth', 
+                                block: 'start' 
+                            });
+                        }, 1000);
+                    } else {
+                        // Student found - show success message
+                        showScannerFeedback(`Student found: ${data.name || data.studentName || 'Unknown'}. Redirecting to edit page...`, 'success');
+                        
+                        // Create loading overlay
+                        const loadingOverlay = document.createElement('div');
+                        loadingOverlay.className = 'loading-overlay show';
+                        loadingOverlay.innerHTML = '<div class="loading-spinner"></div>';
+                        document.body.appendChild(loadingOverlay);
+                        
+                        // Navigate to edit student page
+                        setTimeout(() => {
+                            window.location.href = `/edit_student/${data.id || barcode}`;
+                        }, 1500);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error during barcode search:', error);
+                    scanButton.disabled = false;
+                    scanButton.innerHTML = '<i class="fas fa-barcode"></i> Scan ID';
+                    showScannerFeedback('Error processing barcode. Continue with registration.', 'error');
+                    
+                    // Scroll to form for manual registration
+                    setTimeout(() => {
+                        document.querySelector('.form-container').scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'start' 
+                        });
+                    }, 1000);
+                });
+            }
+            
+            // Function to show feedback message
+            function showScannerFeedback(message, type) {
+                scannerFeedback.innerHTML = `
+                    <div class="scanner-message ${type}">
+                        <i class="fas ${type === 'success' ? 'fa-check-circle' : 
+                               type === 'error' ? 'fa-exclamation-circle' : 
+                               type === 'warning' ? 'fa-exclamation-triangle' : 
+                               'fa-info-circle'}"></i>
+                        ${message}
+                    </div>
+                `;
+                
+                // Auto-clear warning/error messages after 5 seconds
+                if (type === 'warning' || type === 'error') {
+                    setTimeout(() => {
+                        if (scannerFeedback.querySelector(`.${type}`)) {
+                            scannerFeedback.innerHTML = '';
+                        }
+                    }, 5000);
+                }
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Remove any code that references searchInput or downloadTemplate
+            
+            // Set up the Excel upload button
+            const uploadExcelBtn = document.getElementById('uploadExcelBtn');
+            if (uploadExcelBtn) {
+                uploadExcelBtn.addEventListener('click', function() {
+                    // Show file input
+                    const fileInput = document.createElement('input');
+                    fileInput.type = 'file';
+                    fileInput.accept = '.xlsx, .xls';
+                    fileInput.style.display = 'none';
+                    document.body.appendChild(fileInput);
+                    
+                    fileInput.click();
+                    
+                    fileInput.addEventListener('change', function() {
+                        if (this.files.length > 0) {
+                            handleExcelUpload(this.files[0]);
+                        }
+                        document.body.removeChild(fileInput);
+                    });
+                });
+            }
+
+            // ... keep existing code that doesn't reference the removed elements ...
+        });
+
+        // Add this to your JavaScript section
+        function handleExcelListDisplay() {
+            const scrollGuide = document.getElementById('scrollGuide');
+            const scrollProgress = document.getElementById('scrollProgress');
+            const scrollToUpdateBtn = document.getElementById('scrollToUpdateBtn');
+            const updateButton = document.querySelector('.update-button-container');
+
+            if (updateButton) {
+                // Show scroll guide
+                scrollGuide.classList.add('show');
+                scrollToUpdateBtn.classList.add('show');
+
+                // Calculate scroll position
+                const totalScroll = updateButton.offsetTop - window.innerHeight / 2;
+                let currentScroll = 0;
+                const scrollDuration = 1500; // 1.5 seconds
+                const scrollSteps = 60; // 60 steps per second
+                const scrollStep = totalScroll / (scrollDuration / (1000 / scrollSteps));
+
+                // Smooth scroll animation
+                const scrollInterval = setInterval(() => {
+                    if (currentScroll < totalScroll) {
+                        currentScroll = Math.min(currentScroll + scrollStep, totalScroll);
+                        window.scrollTo({
+                            top: currentScroll,
+                            behavior: 'smooth'
+                        });
+
+                        // Update progress bar
+                        const progress = (currentScroll / totalScroll) * 100;
+                        scrollProgress.style.height = `${progress}%`;
+                    } else {
+                        clearInterval(scrollInterval);
+                        
+                        // Highlight update button
+                        updateButton.classList.add('highlight');
+                        
+                        // Hide scroll guide after delay
+                        setTimeout(() => {
+                            scrollGuide.classList.remove('show');
+                            // Keep floating button visible for quick access
+                        }, 2000);
+                    }
+                }, 1000 / scrollSteps);
+            }
+        }
+
+        // Function to handle floating button click
+        function scrollToUpdate() {
+            const updateButton = document.querySelector('.update-button-container');
+            if (updateButton) {
+                updateButton.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+                
+                // Add highlight effect
+                updateButton.classList.add('highlight');
+                setTimeout(() => {
+                    updateButton.classList.remove('highlight');
+                }, 2000);
+            }
+        }
+
+        // Call this function after Excel list is displayed
+        document.addEventListener('DOMContentLoaded', function() {
+            // Existing Excel upload handler
+            const fileInput = document.querySelector('input[type="file"]');
+            if (fileInput) {
+                fileInput.addEventListener('change', function(e) {
+                    if (this.files.length > 0) {
+                        // After processing Excel file and displaying list
+                        setTimeout(handleExcelListDisplay, 500);
+                    }
+                });
+            }
+        });
+
+        // Add image preview function
+        function previewImage(input) {
+            const preview = document.getElementById('profilePreview');
+            const file = input.files[0];
+            
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                };
+                
+                reader.readAsDataURL(file);
+            } else {
+                preview.src = "{{ url_for('static', filename='default.jpg') }}";
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // ... existing code ...
+        });
+    </script>
+    <!-- Add Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p class="mb-0">
+                    <span class="developer">Developed by <strong>Swasthik N Rao</strong></span>
+                    <span class="separator">|</span>
+                    <span class="guidance">Under the guidance of <strong>Mr. Pranam R Betrabet</strong></span>
+                </p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html> 

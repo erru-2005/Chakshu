@@ -1,0 +1,4915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chakshu - Student Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <style>
+        :root {
+            --primary-color: #4a4a4a;
+            --secondary-color: #808080;
+            --accent-color: #666666;
+            --success-color: #5a5a5a;
+            --light-bg: #f5f5f5;
+            --dark-bg: #333333;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --border-radius: 10px;
+            --gradient-start: #4a4a4a;
+            --gradient-mid: #666666;
+            --gradient-end: #808080;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            padding-bottom: 60px; /* Add padding for footer height */
+        }
+
+        main {
+            flex: 1;
+            padding-bottom: 2rem;
+        }
+
+        .college-header {
+            background: linear-gradient(135deg, #1a2a3a 0%, #2c3e50 50%, #1a2a3a 100%);
+            padding: 1.5rem 0 1rem;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .college-header::after {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: radial-gradient(ellipse at center, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 70%);
+            transform: rotate(30deg);
+            pointer-events: none;
+        }
+
+        .college-header h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            letter-spacing: 10px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3), 0 0 10px rgba(52, 152, 219, 0.3);
+            margin-bottom: 0.2rem;
+            background: linear-gradient(135deg, #fff 10%, #e0e0e0 90%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            transform: perspective(500px) translateZ(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .college-header h1:hover {
+            transform: perspective(500px) translateZ(10px);
+        }
+
+        .college-header p {
+            font-size: 1.1rem;
+            font-style: italic;
+            letter-spacing: 1px;
+            margin-bottom: 1.2rem;
+            opacity: 0.95;
+            color: #e0e0e0;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .college-header p::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+        }
+
+        .college-info-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transform: translateY(0);
+            transition: all 0.3s ease;
+            flex-wrap: wrap;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+        
+        .college-info-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+            transform: rotate(-15deg);
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .college-info-card:hover::before {
+            opacity: 1;
+        }
+        
+        .college-info-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .college-info-card img {
+            height: 90px;
+            width: auto;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+            transform: rotate(0);
+            transition: all 0.5s ease;
+            border-radius: 50%;
+            padding: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .college-info-card:hover img {
+            transform: rotate(5deg) scale(1.05);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .college-info-card h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.3rem;
+            font-weight: 600;
+            color: #ffffff;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+            letter-spacing: 0.5px;
+            text-align: center;
+            width: 100%;
+            transition: all 0.3s ease;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .college-info-card h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+            transition: width 0.5s ease;
+        }
+        
+        .college-info-card:hover h2::after {
+            width: 80%;
+        }
+
+        .college-info-card p {
+            margin: 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+            color: rgba(255,255,255,0.9);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .college-info-card:hover p {
+            opacity: 1;
+            letter-spacing: 1px;
+        }
+
+        .btn-outline-light {
+            border-width: 2px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-outline-light:hover {
+            background-color: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .logo-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .college-logo {
+            height: 70px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+            transition: transform 0.3s ease;
+        }
+
+        .college-logo:hover {
+            transform: scale(1.05);
+        }
+
+        .college-info {
+            text-align: left;
+            margin-left: 0.5rem;
+        }
+
+        .college-info h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+            line-height: 1.2;
+        }
+
+        .college-info p {
+            font-size: 0.8rem;
+            margin: 0.1rem 0 0;
+            opacity: 0.9;
+            font-weight: 300;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .project-section {
+            text-align: center;
+            width: 100%;
+        }
+
+        .project-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            margin: 0;
+            letter-spacing: 2px;
+            position: relative;
+            display: block;
+            text-transform: uppercase;
+        }
+
+        .project-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #fff, transparent);
+        }
+
+        .project-tagline {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 300;
+            color: rgba(255,255,255,0.9);
+            margin: 0.25rem 0 0;
+            font-style: italic;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                gap: 0.5rem;
+            }
+
+            .college-logo {
+                height: 60px;
+            }
+
+            .college-info h2 {
+                font-size: 1rem;
+            }
+
+            .project-title {
+                font-size: 2.2rem;
+            }
+
+            .project-tagline {
+                font-size: 0.9rem;
+            }
+        }
+
+        .project-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin: 1rem 0;
+            text-align: center;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            position: relative;
+            display: inline-block;
+        }
+
+        .project-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #fff, transparent);
+        }
+
+        .student-table {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .student-table thead {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-mid));
+            color: white;
+        }
+
+        .student-table th {
+            padding: 1rem;
+            font-weight: 600;
+            border: none;
+        }
+
+        .student-table td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #eee;
+        }
+
+        .student-table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .student-table tbody tr:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .action-buttons .btn {
+            padding: 0.5rem 1rem;
+            margin: 0 0.25rem;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 100px;
+        }
+
+        .action-buttons .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .action-buttons .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .action-buttons .btn:hover::before {
+            left: 100%;
+        }
+        
+        .action-buttons .btn-primary {
+            background: linear-gradient(135deg, #4a4a4a, #666666) !important;
+            border: none;
+            color: white;
+        }
+        
+        .action-buttons .btn-warning {
+            background: linear-gradient(135deg, #808080, #666666) !important;
+            border: none;
+            color: white !important;
+        }
+        
+        .action-buttons .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            border: none;
+            color: white;
+        }
+        
+        .action-buttons .btn i {
+            margin-right: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .action-buttons .btn span {
+            font-weight: 500;
+        }
+        
+        .action-buttons .btn-tooltip {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .action-buttons .btn:hover .btn-tooltip {
+                opacity: 1;
+            bottom: -40px;
+        }
+
+        .search-section {
+            padding: 2rem 1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 2rem 0;
+        }
+
+        .search-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .search-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .search-input {
+            padding: 1rem 1rem 1rem 3.5rem;
+            border-radius: 50px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+            height: 60px;
+            font-size: 1.2rem;
+            width: 100%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-input:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            background: white;
+            outline: none;
+        }
+
+        .search-input:focus + .search-icon {
+            color: var(--primary-color);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .search-stats {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .search-stats .badge {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .search-stats .time {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .search-input:focus {
+            animation: pulse 2s infinite;
+        }
+
+        .search-results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-mid));
+            color: white;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+        
+        .search-results-header h4 {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .student-name-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .student-avatar-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-mid));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .clear-search {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .clear-search:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .empty-state i {
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+        
+        .empty-state h3 {
+            color: #343a40;
+            margin-bottom: 0.5rem;
+        }
+        
+        .empty-state p {
+            color: #6c757d;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stats-icon {
+            font-size: 2rem;
+            color: #007bff;
+            margin-bottom: 1rem;
+        }
+
+        .stats-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #343a40;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .student-table {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            border-top: none;
+            border-bottom: 2px solid #dee2e6;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .class-badge {
+            background: #e9ecef;
+            padding: 0.25rem 0.5rem;
+            border-radius: 15px;
+            font-size: 0.875rem;
+            color: #495057;
+        }
+
+        .action-buttons {
+            white-space: nowrap;
+        }
+
+        .action-buttons .btn {
+            margin: 0 0.25rem;
+        }
+
+        .btn-tooltip {
+            display: none;
+            position: absolute;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            z-index: 1000;
+        }
+
+        .btn:hover .btn-tooltip {
+            display: block;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            z-index: 9999;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+        
+        .notification.error {
+            background: linear-gradient(135deg, #dc3545, #ff6b6b);
+        }
+        
+        .notification.info {
+            background: linear-gradient(135deg, #17a2b8, #20c997);
+        }
+        
+        .loading-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.2rem;
+            z-index: 9999;
+        }
+        
+        .loading-indicator i {
+            margin-right: 10px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 4px;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .toast-success {
+            background-color: #4CAF50;
+        }
+
+        .toast-error {
+            background-color: #f44336;
+        }
+
+        tr {
+            transition: all 0.3s ease;
+        }
+
+        /* Remove these class management related styles */
+        .class-management-section,
+        .class-card,
+        .class-header,
+        .class-title,
+        .class-body,
+        .class-sections,
+        .class-section-item,
+        .section-name,
+        .section-count,
+        .section-actions {
+            display: none;
+        }
+
+        .student-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .student-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .student-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .student-card-header {
+            padding: 1rem;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+        }
+        
+        .student-profile-pic {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            object-fit: cover;
+            margin-right: 0.8rem;
+            background-color: #f5f5f5;
+            transition: all 0.3s ease;
+        }
+        
+        .student-card:hover .student-profile-pic {
+            transform: scale(1.05);
+            border-color: #e0e0e0;
+        }
+
+        .student-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .student-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .detail-line {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .detail-line i {
+            width: 16px;
+            color: #4a4a4a;
+        }
+
+        .student-card-actions {
+            padding: 0.75rem;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+            background: white;
+            border-top: 1px solid #eee;
+        }
+
+        .student-card-actions .btn {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+        }
+
+        /* Add responsive breakpoints */
+        @media (max-width: 1200px) {
+            .student-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .student-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .student-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Add these new styles for the student details modal */
+        .student-details-container {
+            padding: 0;
+            background: #f8f9fa;
+        }
+
+        .student-profile-header {
+            background: linear-gradient(135deg, #4a4a4a, #666666);
+            padding: 2rem;
+            color: white;
+            margin-bottom: 2rem;
+            border-radius: 0 0 30px 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .student-profile-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1));
+            transform: skewX(-30deg);
+        }
+
+        .student-avatar {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: #4a4a4a;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transform: rotate(-5deg);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .student-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 20px;
+        }
+
+        .avatar-text {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #4a4a4a;
+            text-align: center;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+
+        .student-avatar:hover {
+            transform: rotate(0deg) scale(1.05);
+        }
+
+        .student-name {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .student-id {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .student-class {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            backdrop-filter: blur(5px);
+        }
+
+        .detail-blocks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .detail-block {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .detail-block:hover {
+            transform: translateY(-5px);
+        }
+        
+        .detail-block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #4a4a4a, #666666);
+        }
+
+        .detail-block-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .detail-block-title i {
+            width: 30px;
+            height: 30px;
+            background: #4a4a4a;
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .detail-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .detail-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .detail-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .detail-label {
+            display: block;
+            font-size: 0.8rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .modal-actions {
+            background: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .modal-actions .btn {
+            padding: 0.6rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .modal-actions .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .modal-actions .btn-warning {
+            background: linear-gradient(135deg, #808080, #666666) !important;
+            border: none;
+            color: white !important;
+        }
+
+        .modal-actions .btn-primary {
+            background: linear-gradient(135deg, #4a4a4a, #666666) !important;
+            border: none;
+        }
+
+        @media (max-width: 768px) {
+            .detail-blocks-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .student-profile-header {
+                padding: 1.5rem;
+                text-align: center;
+        }
+
+        .student-avatar {
+                margin: 0 auto 1rem auto;
+            }
+        }
+
+        /* Add these new styles for category header and delete button */
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .category-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, #4a4a4a, #666666);
+        }
+
+        .category-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .category-title i {
+            color: #4a4a4a;
+        }
+
+        .category-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .category-count {
+            background: rgba(74, 74, 74, 0.1);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            color: #4a4a4a;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .delete-class-btn {
+            background: transparent;
+            border: none;
+            color: #dc3545;
+            padding: 0.5rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .delete-class-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(220, 53, 69, 0.1);
+            border-radius: 10px;
+            transform: scale(0);
+            transition: transform 0.3s ease;
+        }
+
+        .delete-class-btn:hover::before {
+            transform: scale(1);
+        }
+
+        .delete-class-btn i {
+            position: relative;
+            z-index: 1;
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .delete-class-btn:hover i {
+            transform: scale(1.2);
+        }
+
+        /* Add styles for the class delete confirmation modal */
+        .class-delete-modal .modal-content {
+            border: none;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        
+        .class-delete-header {
+            background: linear-gradient(135deg, #dc3545, #ff4757);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .class-delete-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1));
+            transform: skewX(-30deg);
+        }
+
+        .delete-class-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem auto;
+            animation: pulse 2s infinite;
+        }
+
+        .delete-class-icon i {
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .class-info-box {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1.5rem;
+            border: 1px solid #dee2e6;
+        }
+
+        .class-info-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .class-info-item:hover {
+            transform: translateX(5px);
+        }
+
+        .class-info-item i {
+            width: 40px;
+            height: 40px;
+            background: #dc3545;
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .class-info-item .info-content {
+            flex: 1;
+        }
+
+        .class-info-item .label {
+            display: block;
+            font-size: 0.8rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .class-info-item .value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .delete-class-actions {
+            padding: 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .delete-class-actions .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .delete-class-actions .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .delete-class-actions .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #ff4757);
+            border: none;
+        }
+
+        .delete-class-actions .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            border: none;
+            color: white;
+        }
+
+        /* Add these new styles for the enhanced student details view */
+        .student-details-container {
+            background: #f8f9fa;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .student-profile-header {
+            background: linear-gradient(135deg, #4a4a4a, #666666);
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-header-content {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .student-avatar-large {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #4a4a4a;
+            position: relative;
+            transform: rotate(-5deg);
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .student-avatar-large:hover {
+            transform: rotate(0) scale(1.05);
+        }
+
+        .avatar-badge {
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .avatar-badge.male {
+            background: linear-gradient(135deg, #4a4a4a, #666666);
+        }
+
+        .avatar-badge.female {
+            background: linear-gradient(135deg, #808080, #666666);
+        }
+
+        .student-header-info {
+            color: white;
+        }
+
+        .student-name-large {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .student-badges {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .info-badge {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(5px);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .details-content {
+            padding: 2rem;
+        }
+
+        .quick-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .quick-info-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .quick-info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .quick-info-card i {
+            width: 40px;
+            height: 40px;
+            background: #4a4a4a;
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .quick-info-text {
+            flex: 1;
+        }
+
+        .quick-info-text .label {
+            display: block;
+            font-size: 0.8rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .quick-info-text .value {
+            font-size: 1rem;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .detail-tabs {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .tab-buttons {
+            display: flex;
+            background: #f8f9fa;
+            padding: 1rem;
+            gap: 1rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: none;
+            border-radius: 10px;
+            color: #6c757d;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .tab-btn:hover {
+            background: rgba(74, 144, 226, 0.1);
+            color: #4a90e2;
+        }
+
+        .tab-btn.active {
+            background: #4a4a4a !important;
+            color: white;
+        }
+
+        .tab-content {
+            padding: 2rem;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateX(5px);
+            background: #e9ecef;
+        }
+
+        .info-card.large {
+            grid-column: 1 / -1;
+        }
+
+        .info-card.highlight {
+            background: rgba(74, 144, 226, 0.1);
+        }
+
+        .info-icon {
+            width: 45px;
+            height: 45px;
+            background: #4a4a4a !important;
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .info-details {
+            flex: 1;
+        }
+
+        .info-label {
+            display: block;
+            font-size: 0.8rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .modal-footer {
+            background: white;
+            padding: 1rem 2rem;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .action-buttons .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .action-buttons .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .profile-header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .student-avatar-large {
+                margin: 0 auto;
+            }
+
+            .student-badges {
+                justify-content: center;
+            }
+
+            .tab-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .quick-info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #4a4a4a, #666666);
+            color: rgba(255, 255, 255, 0.9);
+            padding: 1rem 0;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+        }
+
+        .footer-content {
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        .footer .separator {
+            margin: 0 1rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .footer strong {
+            color: white;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .footer-content {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .footer .separator {
+                display: none;
+            }
+            
+            .footer span {
+                display: block;
+                margin: 0.25rem 0;
+            }
+        }
+
+        .differences-section {
+            background: #fff3cd;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border: 1px solid #ffeeba;
+        }
+
+        .differences-list {
+            margin-top: 1rem;
+        }
+
+        .difference-item {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .difference-field {
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .difference-values {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .value {
+            flex: 1;
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+        }
+
+        .value.old {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+        }
+
+        .value.new {
+            background: #e8f5e9;
+            border: 1px solid #c8e6c9;
+        }
+
+        .value .label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-right: 0.5rem;
+        }
+
+        .value .value-text {
+            font-weight: 500;
+        }
+
+        .update-actions {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+
+        .update-actions .btn {
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+        }
+
+        /* Enhanced styles for search and animations */
+        .search-container {
+            transition: all 0.3s ease;
+        }
+        
+        .search-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .student-result {
+            transform: translateY(0);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+        
+        .student-result:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .template-download {
+            position: relative;
+        }
+        
+        .btn-template {
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-template:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-template:after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: width 0.3s ease;
+        }
+        
+        .btn-template:hover:after {
+            width: 100%;
+        }
+        
+        .btn-template .tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            margin-bottom: 5px;
+            pointer-events: none;
+        }
+        
+        .btn-template:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .search-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+
+        .search-wrapper {
+            position: relative;
+            flex: 1;
+            max-width: 600px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        .search-input {
+            padding-left: 3rem;
+            border-radius: 50px;
+            border: 2px solid transparent;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            background: white;
+        }
+
+        .search-input:focus + .search-icon {
+            color: var(--primary-color);
+        }
+
+        .search-animation {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid var(--primary-color);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .search-input.searching + .search-animation {
+            opacity: 1;
+            animation: spin 1s linear infinite;
+        }
+
+        .template-wrapper {
+            position: relative;
+        }
+
+        .btn-template {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-template:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-template:active {
+            transform: translateY(0);
+        }
+
+        .btn-template i {
+            font-size: 1.2rem;
+        }
+
+        .template-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-10px);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn-template:hover .template-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-5px);
+        }
+
+        @keyframes spin {
+            0% { transform: translateY(-50%) rotate(0deg); }
+            100% { transform: translateY(-50%) rotate(360deg); }
+        }
+
+        .student-row {
+            transition: all 0.3s ease;
+        }
+
+        .student-row.filtered-in {
+            animation: highlight 0.5s ease;
+        }
+
+        @keyframes highlight {
+            0% { background-color: rgba(var(--primary-color), 0.1); }
+            100% { background-color: transparent; }
+        }
+
+        /* Student Profile Styles */
+        .student-profile {
+            padding: 20px;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .avatar-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1.5rem;
+            overflow: hidden;
+            border: 3px solid white;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        
+        .avatar-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .avatar-text {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #4a4a4a;
+            text-align: center;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+
+        .header-info {
+            flex: 1;
+        }
+
+        .student-name {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .student-badges {
+            display: flex;
+            gap: 10px;
+        }
+
+        .badge {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .detail-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: #6e8efb;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .detail-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+        }
+
+        .detail-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        /* Modal Customization */
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .modal-body {
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        /* Scrollbar Styling */
+        .modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Enhanced Student Profile Styles */
+        .student-profile {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .student-profile::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 150px;
+            background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+            border-radius: 20px 20px 0 0;
+            z-index: 0;
+        }
+
+        .profile-header {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-top: 1rem;
+        }
+
+        /* Avatar styles are defined elsewhere */
+
+        .header-info {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-top: -2rem;
+        }
+
+        .student-name {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #212529;
+            font-weight: 600;
+        }
+
+        .student-badges {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .student-badges .badge {
+            padding: 0.8rem 1.2rem;
+            font-size: 1rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .student-badges .badge:hover {
+            transform: translateY(-3px);
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .detail-section {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .detail-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, #0d6efd, #0dcaf0);
+        }
+
+        .detail-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            color: #0d6efd;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            font-size: 1.4rem;
+            color: #0dcaf0;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .detail-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .detail-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .detail-label {
+            display: block;
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            display: block;
+            font-size: 1.1rem;
+            color: #212529;
+            font-weight: 600;
+        }
+
+        /* Enhanced Modal Styles */
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+            color: white;
+            border-bottom: none;
+            padding: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: 0;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            border-top: none;
+            padding: 1.5rem;
+            background: #f8f9fa;
+        }
+
+        /* Custom Scrollbar */
+        .modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #0d6efd, #0dcaf0);
+            border-radius: 10px;
+        }
+
+        /* Grey Theme Styles */
+        .student-profile {
+            background: #f5f5f5;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .student-profile::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 150px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border-radius: 20px 20px 0 0;
+            z-index: 0;
+        }
+
+        .profile-header {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-top: 1rem;
+        }
+
+        .avatar-circle {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 3rem;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border: 4px solid white;
+            transition: transform 0.3s ease;
+        }
+
+        .avatar-circle:hover {
+            transform: scale(1.05);
+        }
+
+        .header-info {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-top: -2rem;
+        }
+
+        .student-name {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        /* Tab Navigation */
+        .nav-tabs {
+            border: none;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            color: #7f8c8d;
+            padding: 1rem 2rem;
+            font-weight: 500;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            margin-right: 0.5rem;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: #2c3e50;
+            background: #f5f5f5;
+        }
+
+        .nav-tabs .nav-link.active {
+            background: #2c3e50;
+            color: white;
+        }
+
+        .tab-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Detail Sections */
+        .detail-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .detail-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            font-size: 1.4rem;
+            color: #7f8c8d;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .detail-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .detail-item:hover {
+            background: #f5f5f5;
+            transform: translateX(5px);
+        }
+
+        .detail-label {
+            display: block;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            display: block;
+            font-size: 1.1rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            border-bottom: none;
+            padding: 1.5rem;
+        }
+
+        .modal-body {
+            padding: 0;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Custom Scrollbar */
+        .modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #2c3e50, #34495e);
+            border-radius: 10px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-tabs .nav-link {
+                padding: 0.8rem 1.2rem;
+                font-size: 0.9rem;
+            }
+            
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Grey Theme Styles */
+        .student-profile {
+            background: #f5f5f5;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .student-profile::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 150px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border-radius: 20px 20px 0 0;
+            z-index: 0;
+        }
+
+        /* Enhanced Tab Navigation */
+        .nav-tabs {
+            border: none;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            color: #7f8c8d;
+            padding: 1rem 2rem;
+            font-weight: 500;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-tabs .nav-link::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #2c3e50;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: #2c3e50;
+            background: #f5f5f5;
+        }
+
+        .nav-tabs .nav-link.active {
+            background: #2c3e50;
+            color: white;
+        }
+
+        .nav-tabs .nav-link.active::before {
+            transform: scaleX(1);
+        }
+
+        .nav-tabs .nav-link i {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-tabs .nav-link:hover i {
+            transform: scale(1.1);
+        }
+
+        /* Contact Info Tab Specific Styles */
+        .contact-info-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .contact-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border-left: 4px solid #2c3e50;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            background: #f0f0f0;
+        }
+
+        .contact-icon {
+            width: 40px;
+            height: 40px;
+            background: #2c3e50;
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .contact-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .contact-value {
+            font-size: 1.1rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        /* Tab Content Animation */
+        .tab-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .tab-pane {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .nav-tabs .nav-link {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Add these new styles for enhanced upload success notification */
+        .upload-success-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 9999;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .upload-success-content {
+            text-align: center;
+            position: relative;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            animation: scaleIn 0.5s ease;
+        }
+
+        .success-icon i {
+            font-size: 2.5rem;
+            color: #4CAF50;
+            animation: checkmark 0.5s ease;
+        }
+
+        .success-message {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            animation: slideUp 0.5s ease;
+        }
+
+        .success-details {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+            animation: slideUp 0.5s ease 0.2s backwards;
+        }
+
+        .success-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+            animation: slideUp 0.5s ease 0.4s backwards;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .success-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            animation: slideUp 0.5s ease 0.6s backwards;
+        }
+
+        .success-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .success-btn-primary {
+            background: white;
+            color: #4CAF50;
+        }
+
+        .success-btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .success-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        @keyframes checkmark {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ffd700;
+            opacity: 0;
+            animation: confetti 2s ease forwards;
+        }
+
+        @keyframes confetti {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Edit Class Modal Styles */
+        .edit-class-header {
+            background: linear-gradient(135deg, #ffc107, #ffdb4d);
+            color: white;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            border: none;
+        }
+
+        .edit-class-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1));
+            transform: skewX(-30deg);
+        }
+
+        .edit-class-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem auto;
+            animation: pulse 2s infinite;
+        }
+
+        .edit-class-icon i {
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .edit-title {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .edit-subtitle {
+            display: block;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .input-group-text {
+            background: #ffc107;
+            border: none;
+            color: white;
+            padding: 0.75rem 1rem;
+        }
+
+        .input-group .form-control {
+            border: none;
+            padding: 0.75rem 1rem;
+            font-size: 1.1rem;
+        }
+
+        .input-group .form-control:focus {
+            box-shadow: none;
+            border-color: #ffc107;
+        }
+
+        .class-name-preview {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .preview-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .preview-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .edit-info-box {
+            background: #fff3cd;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .info-icon {
+            width: 40px;
+            height: 40px;
+            background: #ffc107;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .info-content h6 {
+            color: #856404;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .info-content ul {
+            margin: 0;
+            padding-left: 1.2rem;
+            color: #666;
+        }
+
+        .info-content li {
+            margin-bottom: 0.3rem;
+        }
+
+        .modal-footer {
+            border-top: none;
+            padding: 1.5rem;
+        }
+
+        .modal-footer .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .modal-footer .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .modal-footer .btn-warning {
+            background: linear-gradient(135deg, #ffc107, #ffdb4d);
+            border: none;
+            color: white;
+        }
+
+        .modal-footer .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            border: none;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Add these styles for the tabbed student detail view */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 0;
+        }
+
+        /* Bulk Image Upload Styles */
+        .dropzone-container {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .dropzone-container.drag-over {
+            background-color: rgba(74, 74, 74, 0.1);
+            border-color: #4a4a4a;
+        }
+        
+        .dropzone-message {
+            color: #6c757d;
+        }
+        
+        .dropzone-message i {
+            color: #4a4a4a;
+        }
+        
+        #imagePreviewGrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .image-preview-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            height: 150px;
+        }
+        
+        .image-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .image-preview-item .filename {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 5px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .image-preview-item .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255,255,255,0.7);
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .image-preview-item .remove-btn:hover {
+            background: rgba(220,53,69,0.9);
+            color: white;
+        }
+
+        /* Image Upload Results Styles */
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto;
+            background-color: #f8f9fa;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+   .image-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+}
+
+.image-modal img.modal-content {
+    display: block;
+    max-width: 90%;
+    max-height: 90%;
+    width: auto;
+    height: auto;
+    object-fit: contain; /* important to preserve aspect ratio */
+    box-shadow: 0 0 20px rgba(255,255,255,0.2);
+}
+
+.image-modal .close-btn {
+    position: absolute;
+    top: 20px;
+    right: 35px;
+    color: #fff;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+    </style>
+</head>
+<body>
+    <!-- College Header -->
+    <header class="college-header">
+        <div class="container">
+            <div class="text-center text-white">
+                <h1>CHAKSHU</h1>
+                <p>Not just an eye, a vision</p>
+            </div>
+            <div class="college-info-card">
+                <img src="{{ url_for('static', filename='clglogo.png') }}" alt="College Logo">
+                <div class="text-white text-center">
+                    <h2>Dr. B. B. Hegde First Grade College</h2>
+                    <p>Kundapura</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container my-5">
+        <!-- Enhanced Search Section -->
+        <div class="search-section mb-4">
+            <div class="search-container">
+                <div class="search-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" class="form-control search-input" 
+                           placeholder="Search students by name, roll number, class, or registration number..."
+                           autocomplete="off">
+                    <div class="search-animation"></div>
+                </div>
+            </div>
+            <div class="search-stats mt-2">
+                <span id="searchResultsCount" class="badge bg-primary">0 results</span>
+                <span id="searchTime" class="text-muted ms-2"></span>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                        {% if category == 'success' %}
+                            <i class="fas fa-check-circle me-2"></i>
+                        {% elif category == 'error' %}
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                        {% else %}
+                            <i class="fas fa-info-circle me-2"></i>
+                        {% endif %}
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Add this right after the header section, before the main content -->
+        <div class="container mt-4">
+            <!-- Enhanced Management Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">
+                    <i class="fas fa-users"></i> Student Management
+                </h2>
+                <div>
+                    <button id="bulkImageUploadBtn" class="btn btn-success me-2">
+                        <i class="fas fa-images"></i> Bulk Image Upload
+                    </button>
+                    <a href="/" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add New Student
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student List -->
+        <div id="studentList">
+            {% if not has_students %}
+                <div class="no-results">
+                    <div class="empty-state">
+                        <i class="fas fa-users fa-3x mb-3"></i>
+                        <h3>No Students Found</h3>
+                        <p>There are currently no students in the system.</p>
+                    </div>
+                </div>
+            {% else %}
+                {% set classes = {} %}
+                            {% for student in students %}
+                    {% if student.classSection not in classes %}
+                        {% set _ = classes.update({student.classSection: []}) %}
+                    {% endif %}
+                    {% set _ = classes[student.classSection].append(student) %}
+                {% endfor %}
+
+                {% for class_name, class_students in classes.items() %}
+                <div class="category-section">
+                    <div class="category-header">
+                        <div class="category-title">
+                            <i class="fas fa-graduation-cap"></i>
+                            {{ class_name or 'Unassigned' }}
+                        </div>
+                        <div class="category-actions">
+                            <div class="category-count">
+                                {{ class_students|length }} Students
+                            </div>
+                            <button class="btn btn-warning edit-class-btn" 
+                                    onclick="editClass(this)" 
+                                    data-class-name="{{ class_name }}"
+                                    data-student-count="{{ class_students|length }}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger delete-class-btn" 
+                                    onclick="deleteClass(this)" 
+                                    data-class-name="{{ class_name }}"
+                                    data-student-count="{{ class_students|length }}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="student-grid">
+                        {% for student in class_students %}
+                        <div class="student-card">
+                            <div class="student-card-header">
+                                {% if student.profileImage %}
+                                <img src="{{ url_for('static', filename=student.profileImage) }}" alt="{{ student.studentName }}" class="student-profile-pic" onError="this.onerror=null; this.src='/static/uploads/default.png'">
+                                {% else %}
+                                <img src="{{ url_for('static', filename='default.jpg') }}" alt="No Photo" class="student-profile-pic">
+                                {% endif %}
+                                <div class="student-info">
+                                    <div class="student-name">{{ student.studentName }}</div>
+                                    <div class="student-details">
+                                        <div class="detail-line">
+                                            <i class="fas fa-id-card"></i>
+                                            <span>{{ student.rollNo }}</span>
+                                        </div>
+                                        <div class="detail-line">
+                                            <i class="fas fa-registered"></i>
+                                            <span>{{ student.regNo or 'N/A' }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="student-card-actions">
+                                <button class="btn btn-primary btn-sm" 
+                                        data-student='{{ student|tojson|safe }}'
+                                        onclick="viewStudentDetails(this)">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-warning btn-sm" 
+                                        onclick="editStudent('{{ student.rollNo }}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm" 
+                                        data-student-id="{{ student.rollNo }}"
+                                        data-student-name="{{ student.studentName }}"
+                                        data-student-class="{{ student.classSection or 'Unassigned' }}"
+                                        onclick="deleteStudentFromSearch(this)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                            {% endfor %}
+                </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </main>
+
+    <!-- Student Details Modal -->
+    <div class="modal fade" id="studentDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, var(--gradient-start), var(--gradient-mid)); color: white;">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-graduate me-2"></i> Student Details
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="max-height: 80vh; overflow-y: auto;">
+                    <div id="studentDetails"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmationModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #ff6b6b, #ff8e8e); color: white;">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i> Confirm Deletion
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <div class="delete-icon-container">
+                            <i class="fas fa-trash-alt"></i>
+                        </div>
+                        <h4 class="mt-3">Are you sure you want to delete this student?</h4>
+                        <p class="text-muted">This action cannot be undone.</p>
+                    </div>
+                    <div class="student-info-delete">
+                        <div class="info-item">
+                            <i class="fas fa-user"></i>
+                            <div>
+                                <span class="label">Student Name</span>
+                                <span class="value" id="deleteStudentName"></span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-id-card"></i>
+                            <div>
+                                <span class="label">Roll Number</span>
+                                <span class="value" id="deleteStudentRoll"></span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-graduation-cap"></i>
+                            <div>
+                                <span class="label">Class</span>
+                                <span class="value" id="deleteStudentClass"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i> Cancel
+                    </button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                        <i class="fas fa-trash me-2"></i> Delete Student
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add the new class delete confirmation modal -->
+    <div class="modal fade" id="deleteClassModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content class-delete-modal">
+                <div class="class-delete-header">
+                    <div class="delete-class-icon">
+                        <i class="fas fa-trash-alt"></i>
+                    </div>
+                    <h4>Delete Entire Class?</h4>
+                    <p class="mb-0">This action will remove all students from this class.</p>
+                </div>
+                <div class="modal-body">
+                    <div class="class-info-box">
+                        <div class="class-info-item">
+                            <i class="fas fa-graduation-cap"></i>
+                            <div class="info-content">
+                                <span class="label">Class Name</span>
+                                <span class="value" id="deleteClassName"></span>
+                            </div>
+                        </div>
+                        <div class="class-info-item">
+                            <i class="fas fa-users"></i>
+                            <div class="info-content">
+                                <span class="label">Total Students</span>
+                                <span class="value" id="deleteClassCount"></span>
+                            </div>
+                        </div>
+                        <div class="class-info-item">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div class="info-content">
+                                <span class="label">Warning</span>
+                                <span class="value" style="color: #dc3545">This action cannot be undone!</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="delete-class-actions">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                        <span>Cancel</span>
+                    </button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteClass">
+                        <i class="fas fa-trash-alt"></i>
+                        <span>Delete Class</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Modal elements here -->
+    <div class="modal fade" id="warningModal" tabindex="-1" aria-labelledby="warningModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title" id="warningModalLabel">
+                        <i class="fas fa-exclamation-triangle"></i> Warning
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="warningMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add this for the upload dialog -->
+    <div class="upload-container" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>Upload Student Data</h3>
+            <button type="button" class="btn-close" id="closeUpload"></button>
+                            </div>
+        <form id="uploadForm">
+            <div id="uploadArea" class="upload-area">
+                <i class="fas fa-file-excel"></i>
+                <h3>Upload Excel File</h3>
+                <p>Drag & drop your Excel file here, or click to browse</p>
+                <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls">
+                                </div>
+            <div id="uploadProgress" style="display: none;">
+                <div class="progress">
+                    <div id="progressBar" class="progress-bar" role="progressbar"></div>
+                                </div>
+                <p class="text-center">Uploading...</p>
+                            </div>
+            <div id="uploadPreview" class="upload-preview"></div>
+        </form>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="/static/js/notifications.js"></script>
+    <script src="/static/js/search.js"></script>
+    <script src="/static/js/excel_upload.js"></script>
+
+    <!-- Include our enhanced student search JS -->
+    <script src="{{ url_for('static', filename='js/student-search.js') }}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const searchFilter = document.getElementById('searchFilter');
+            const searchResultsCount = document.getElementById('searchResultsCount');
+            const searchTime = document.getElementById('searchTime');
+            const studentRows = document.querySelectorAll('table tbody tr');
+            let searchTimeout;
+
+            function performSearch() {
+                const query = searchInput.value.toLowerCase().trim();
+                const filterType = searchFilter.value;
+                const startTime = performance.now();
+                let resultsCount = 0;
+
+                // Show loading animation
+                searchInput.classList.add('searching');
+
+                // Clear previous timeout
+                if (searchTimeout) {
+                    clearTimeout(searchTimeout);
+                }
+
+                // Add a small delay to prevent too frequent searches
+                searchTimeout = setTimeout(() => {
+                    studentRows.forEach(row => {
+                        const studentData = {
+                            name: row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '',
+                            rollNo: row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '',
+                            regNo: row.querySelector('td:nth-child(4)')?.textContent.toLowerCase() || '',
+                            class: row.querySelector('td:nth-child(5)')?.textContent.toLowerCase() || ''
+                        };
+
+                        let isMatch = false;
+
+                        if (filterType === 'all') {
+                            // Search across all fields
+                            isMatch = Object.values(studentData).some(value => value.includes(query));
+                        } else {
+                            // Search in specific field
+                            isMatch = studentData[filterType].includes(query);
+                        }
+
+                        if (isMatch) {
+                            row.style.display = '';
+                            row.classList.add('filtered-in');
+                            resultsCount++;
+                        } else {
+                            row.style.display = 'none';
+                            row.classList.remove('filtered-in');
+                        }
+                    });
+
+                    // Update search stats
+                    const endTime = performance.now();
+                    const searchDuration = (endTime - startTime).toFixed(2);
+                    searchResultsCount.textContent = `${resultsCount} result${resultsCount !== 1 ? 's' : ''}`;
+                    searchTime.textContent = `in ${searchDuration}ms`;
+
+                    // Remove loading animation
+                    searchInput.classList.remove('searching');
+                }, 300);
+            }
+
+            // Add event listeners
+            searchInput.addEventListener('input', performSearch);
+            searchFilter.addEventListener('change', performSearch);
+
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.key === '/' && !e.target.matches('input, textarea')) {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+            });
+
+            // Add tooltip for keyboard shortcut
+            searchInput.setAttribute('title', 'Press "/" to focus search');
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Upload button functionality
+            const uploadBtn = document.getElementById('uploadButton');
+            const uploadContainer = document.querySelector('.upload-container');
+            const closeUpload = document.getElementById('closeUpload');
+            
+            if (uploadBtn) {
+                uploadBtn.addEventListener('click', function() {
+                    if (uploadContainer) {
+                        uploadContainer.style.display = 'block';
+                    }
+                });
+        }
+
+            if (closeUpload) {
+                closeUpload.addEventListener('click', function() {
+                    if (uploadContainer) {
+                        uploadContainer.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Function to refresh student list
+            window.refreshStudentList = function() {
+                window.location.href = '/refresh_data';
+            };
+            
+            // Delete student functionality
+            const deleteButtons = document.querySelectorAll('.delete-student');
+            deleteButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                    const studentId = this.getAttribute('data-id');
+                    
+                    if (confirm('Are you sure you want to delete this student?')) {
+                        fetch(`/delete_student/${studentId}`, {
+                            method: 'DELETE'
+                        })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                                // Show success animation
+                                showSuccess('Student deleted successfully!', true);
+                                
+                                // Remove student row from UI
+                                const studentRow = document.querySelector(`tr[data-id="${studentId}"]`);
+                                if (studentRow) {
+                                    studentRow.remove();
+                                }
+                    } else {
+                                showError(data.message || 'Error deleting student');
+                    }
+                })
+                .catch(error => {
+                            showError('Error: ' + error.message);
+                });
+        }
+                });
+            });
+
+            // Export button functionality
+            const exportBtn = document.getElementById('exportButton');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', function() {
+                    fetch('/export')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                            showSuccess(`Students exported to ${data.file_path}`, true);
+                } else {
+                            showError(data.message || 'Error exporting data');
+                }
+            })
+            .catch(error => {
+                        showError('Error: ' + error.message);
+                    });
+        });
+            }
+        });
+
+        // Enhanced search functionality with live filtering
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            
+            if (searchInput) {
+                // Show all students by default
+                const allStudentRows = document.querySelectorAll('table tbody tr');
+                allStudentRows.forEach(row => {
+                    row.style.display = '';
+                });
+                
+                // Live filtering as user types
+                searchInput.addEventListener('input', function() {
+                    const query = this.value.toLowerCase().trim();
+                    const filterType = document.getElementById('searchFilter') ? 
+                                    document.getElementById('searchFilter').value : 'all';
+                    
+                    // If search is empty, show all students
+                    if (!query) {
+                        allStudentRows.forEach(row => {
+                            row.style.display = '';
+                            row.classList.remove('filtered-in');
+                        });
+                        return;
+                    }
+                    
+                    // Filter rows based on search query
+                    let matches = 0;
+                    allStudentRows.forEach(row => {
+                        let shouldShow = false;
+                        
+                        // Get text content from all cells
+                        const cells = row.querySelectorAll('td');
+                        cells.forEach(cell => {
+                            const text = cell.textContent.toLowerCase();
+                            
+                            // Apply filters based on filter type
+                            if ((filterType === 'all' && text.includes(query)) ||
+                                (filterType === 'name' && cell.classList.contains('name-cell') && text.includes(query)) ||
+                                (filterType === 'rollNo' && cell.classList.contains('roll-cell') && text.includes(query)) ||
+                                (filterType === 'regNo' && cell.classList.contains('reg-cell') && text.includes(query)) ||
+                                (filterType === 'class' && cell.classList.contains('class-cell') && text.includes(query))) {
+                                shouldShow = true;
+                            }
+                        });
+                        
+                        // Apply visibility with animation
+                        if (shouldShow) {
+                            row.style.display = '';
+                            setTimeout(() => {
+                                row.classList.add('filtered-in');
+                            }, 10);
+                            matches++;
+                        } else {
+                            row.classList.remove('filtered-in');
+                            setTimeout(() => {
+                                row.style.display = 'none';
+                            }, 200);
+                        }
+                    });
+                    
+                    // Show message if no matches
+                    const noResultsMsg = document.getElementById('noResultsMessage');
+                    if (noResultsMsg) {
+                        if (matches === 0) {
+                            noResultsMsg.style.display = 'block';
+                        } else {
+                            noResultsMsg.style.display = 'none';
+                        }
+                    }
+                });
+            }
+            
+            // Enhanced template download
+            const templateBtn = document.getElementById('downloadTemplate');
+            if (templateBtn) {
+                templateBtn.addEventListener('click', function() {
+                    // Add loading state to button
+                    this.classList.add('loading');
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing...';
+                    
+                    // Request the template file
+                    fetch('/templates/student_template.xlsx')
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.blob();
+                        })
+                        .then(blob => {
+                            // Create a download link and trigger it
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = url;
+                            a.download = 'student_template.xlsx';
+                            document.body.appendChild(a);
+                            a.click();
+                            window.URL.revokeObjectURL(url);
+                            
+                            // Show success message
+                            showSuccess('Template downloaded successfully!');
+                            
+                            // Reset button
+                            setTimeout(() => {
+                                templateBtn.classList.remove('loading');
+                                templateBtn.innerHTML = '<span class="tooltip">Download Excel Template Format</span><i class="fas fa-download"></i> Download Template';
+                            }, 500);
+                        })
+                        .catch(error => {
+                            console.error('Error downloading template:', error);
+                            showError('Error downloading template. Please try again.');
+                            
+                            // Reset button
+                            templateBtn.classList.remove('loading');
+                            templateBtn.innerHTML = '<span class="tooltip">Download Excel Template Format</span><i class="fas fa-download"></i> Download Template';
+                        });
+                });
+            }
+        });
+    </script>
+    <!-- Add Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p class="mb-0">
+                    <span class="developer">Developed by <strong>Swasthik N Rao</strong></span>
+                    <span class="separator">|</span>
+                    <span class="guidance">Under the guidance of <strong>Mr. Pranam R Betrabet</strong></span>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Template download functionality
+        document.getElementById('downloadTemplate').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Add loading state
+            this.classList.add('loading');
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner"></i> Downloading...';
+            
+            // Simulate or perform actual download
+            setTimeout(() => {
+                // Get the URL from the server
+                fetch('/download_template')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        // Create temporary link for download
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = url;
+                        a.download = 'student_template.xlsx';
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        
+                        // Success state
+                        this.innerHTML = '<i class="fas fa-check"></i> Downloaded!';
+                        
+                        // Show success notification
+                        showNotification('Template downloaded successfully!', 'success', true);
+                        
+                        // Reset button after delay
+                        setTimeout(() => {
+                            this.innerHTML = originalText;
+                            this.classList.remove('loading');
+                        }, 1500);
+                    })
+                    .catch(error => {
+                        console.error('Download error:', error);
+                        this.innerHTML = originalText;
+                        this.classList.remove('loading');
+                        showNotification('Error downloading template', 'error');
+                    });
+            }, 800);
+        });
+    </script>
+
+    <script>
+        // Delete student functionality
+        function deleteStudentFromSearch(button) {
+            const studentId = button.getAttribute('data-student-id');
+            const studentName = button.getAttribute('data-student-name');
+            const studentClass = button.getAttribute('data-student-class');
+            
+            // Set the confirmation modal content
+            document.getElementById('deleteStudentName').textContent = studentName;
+            document.getElementById('deleteStudentRoll').textContent = studentId;
+            document.getElementById('deleteStudentClass').textContent = studentClass;
+            
+            // Show the confirmation modal
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
+            deleteModal.show();
+            
+            // Set up the confirm delete button
+            document.getElementById('confirmDeleteBtn').onclick = function() {
+                // Add loading state
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+                this.disabled = true;
+                
+                // Make the delete request
+                fetch(`/delete_student/${studentId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        showNotification('Student deleted successfully!', 'success');
+                        
+                        // Remove the student card from the UI
+                        const studentCard = button.closest('.student-card');
+                        const categorySection = studentCard.closest('.category-section');
+                        studentCard.remove();
+                        
+                        // Update student count
+                        const countElement = categorySection.querySelector('.category-count');
+                        const currentCount = parseInt(countElement.textContent);
+                        countElement.textContent = `${currentCount - 1} Students`;
+                        
+                        // If no students left in the category, remove the category section
+                        if (currentCount - 1 === 0) {
+                            categorySection.remove();
+                        }
+                        
+                        // Hide the modal
+                        deleteModal.hide();
+                    } else {
+                        showNotification(data.error || 'Error deleting student', 'error');
+                        this.innerHTML = '<i class="fas fa-trash"></i> Delete Student';
+                        this.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error deleting student', 'error');
+                    this.innerHTML = '<i class="fas fa-trash"></i> Delete Student';
+                    this.disabled = false;
+                });
+            };
+        }
+        
+        // Delete class functionality
+        function deleteClass(button) {
+            const className = button.getAttribute('data-class-name');
+            const studentCount = button.getAttribute('data-student-count');
+            
+            // Set the confirmation modal content
+            document.getElementById('deleteClassName').textContent = className;
+            document.getElementById('deleteClassCount').textContent = studentCount;
+            
+            // Show the confirmation modal
+            const deleteClassModal = new bootstrap.Modal(document.getElementById('deleteClassModal'));
+            deleteClassModal.show();
+            
+            // Set up the confirm delete button
+            document.getElementById('confirmDeleteClass').onclick = function() {
+                // Add loading state
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+                this.disabled = true;
+                
+                // Make the delete request
+                fetch(`/delete_class/${encodeURIComponent(className)}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        showNotification(`Successfully deleted ${data.deletedCount} students from class ${className}`, 'success');
+                        
+                        // Remove the category section from the UI
+                        const categorySection = button.closest('.category-section');
+                        categorySection.remove();
+                        
+                        // Hide the modal
+                        deleteClassModal.hide();
+                    } else {
+                        showNotification(data.error || 'Error deleting class', 'error');
+                        this.innerHTML = '<i class="fas fa-trash-alt"></i> Delete Class';
+                        this.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error deleting class', 'error');
+                    this.innerHTML = '<i class="fas fa-trash-alt"></i> Delete Class';
+                    this.disabled = false;
+                });
+            };
+        }
+        
+        // Notification function
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 3000);
+        }
+    </script>
+
+    <script>
+        // Tab switching functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons and panes
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabPanes.forEach(pane => pane.classList.remove('active'));
+
+                    // Add active class to clicked button
+                    this.classList.add('active');
+
+                    // Show corresponding tab pane
+                    const targetPane = document.querySelector(this.getAttribute('data-tab'));
+                    if (targetPane) {
+                        targetPane.classList.add('active');
+                    }
+                });
+            });
+
+            // Activate first tab by default
+            if (tabButtons.length > 0) {
+                tabButtons[0].click();
+            }
+        });
+    </script>
+
+    <!-- Add this before the closing body tag -->
+    <div class="upload-success-container" id="uploadSuccessContainer">
+        <div class="upload-success-content">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h2 class="success-message">Upload Successful!</h2>
+            <p class="success-details">Your student data has been successfully imported into the system.</p>
+            <div class="success-stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="uploadedCount">0</div>
+                    <div class="stat-label">Students Added</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="updatedCount">0</div>
+                    <div class="stat-label">Students Updated</div>
+                </div>
+            </div>
+            <div class="success-actions">
+                <button class="success-btn success-btn-primary" onclick="refreshStudentList()">
+                    <i class="fas fa-sync-alt"></i> Refresh List
+                </button>
+                <button class="success-btn success-btn-secondary" onclick="closeSuccessModal()">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add this function to show the success modal
+        function showUploadSuccess(uploaded, updated) {
+            const container = document.getElementById('uploadSuccessContainer');
+            const uploadedCount = document.getElementById('uploadedCount');
+            const updatedCount = document.getElementById('updatedCount');
+            
+            // Update counts
+            uploadedCount.textContent = uploaded;
+            updatedCount.textContent = updated;
+            
+            // Show container
+            container.style.display = 'block';
+            
+            // Create confetti
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(confetti);
+            }
+        }
+
+        // Add this function to close the success modal
+        function closeSuccessModal() {
+            const container = document.getElementById('uploadSuccessContainer');
+            container.style.display = 'none';
+            
+            // Remove all confetti
+            const confetti = container.querySelectorAll('.confetti');
+            confetti.forEach(c => c.remove());
+        }
+
+        // Modify your existing upload success handler to use the new modal
+        function handleUploadSuccess(response) {
+            showUploadSuccess(response.added || 0, response.updated || 0);
+        }
+    </script>
+
+    <!-- Add the new class edit modal -->
+    <div class="modal fade" id="editClassModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header edit-class-header">
+                    <div class="edit-class-icon">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <h5 class="modal-title">
+                        <span class="edit-title">Edit Class Name</span>
+                        <span class="edit-subtitle">Update the class name for all students</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-graduation-cap"></i>
+                            </span>
+                            <input type="text" class="form-control" id="newClassName" placeholder="Enter new class name">
+                        </div>
+                        <div class="class-name-preview">
+                            <span class="preview-label">Preview:</span>
+                            <span class="preview-value" id="classNamePreview"></span>
+                        </div>
+                    </div>
+                    <div class="edit-info-box">
+                        <div class="info-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="info-content">
+                            <h6>What happens when you rename a class?</h6>
+                            <ul>
+                                <li>All students in this class will be updated</li>
+                                <li>The change will be reflected immediately</li>
+                                <li>No data will be lost</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                        <span>Cancel</span>
+                    </button>
+                    <button type="button" class="btn btn-warning" id="confirmEditClass">
+                        <i class="fas fa-save"></i>
+                        <span>Save Changes</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add this to your existing JavaScript
+        document.getElementById('newClassName').addEventListener('input', function() {
+            const preview = document.getElementById('classNamePreview');
+            preview.textContent = this.value || 'Class name will appear here';
+        });
+
+        // Edit class functionality
+        function editClass(button) {
+            const className = button.getAttribute('data-class-name');
+            
+            // Set the current class name in the input field
+            document.getElementById('newClassName').value = className;
+            document.getElementById('classNamePreview').textContent = className;
+            
+            // Show the edit modal
+            const editClassModal = new bootstrap.Modal(document.getElementById('editClassModal'));
+            editClassModal.show();
+            
+            // Set up the confirm edit button
+            document.getElementById('confirmEditClass').onclick = function() {
+                const newClassName = document.getElementById('newClassName').value.trim();
+                
+                if (!newClassName) {
+                    showNotification('Please enter a valid class name', 'error');
+                    return;
+                }
+                
+                // Add loading state
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                this.disabled = true;
+                
+                // Make the edit request
+                fetch(`/edit_class/${encodeURIComponent(className)}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        newClassName: newClassName
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        showNotification(`Successfully renamed class to ${newClassName}`, 'success');
+                        
+                        // Update the class name in the UI
+                        const categorySection = button.closest('.category-section');
+                        const categoryTitle = categorySection.querySelector('.category-title');
+                        categoryTitle.innerHTML = `<i class="fas fa-graduation-cap"></i> ${newClassName}`;
+                        
+                        // Update all student cards in this class section
+                        const studentCards = categorySection.querySelectorAll('.student-card');
+                        studentCards.forEach(card => {
+                            // Update the class name in the student card data
+                            const viewButton = card.querySelector('.btn-primary');
+                            const editButton = card.querySelector('.btn-warning');
+                            const deleteButton = card.querySelector('.btn-danger');
+                            
+                            // Update student data in the view button
+                            if (viewButton) {
+                                const studentData = JSON.parse(viewButton.getAttribute('data-student'));
+                                studentData.classSection = newClassName;
+                                viewButton.setAttribute('data-student', JSON.stringify(studentData));
+                            }
+                            
+                            // Update class name in delete button
+                            if (deleteButton) {
+                                deleteButton.setAttribute('data-student-class', newClassName);
+                            }
+                        });
+                        
+                        // Update the data attributes on the class buttons
+                        button.setAttribute('data-class-name', newClassName);
+                        const deleteButton = categorySection.querySelector('.delete-class-btn');
+                        deleteButton.setAttribute('data-class-name', newClassName);
+                        
+                        // Hide the modal
+                        editClassModal.hide();
+                    } else {
+                        showNotification(data.error || 'Error renaming class', 'error');
+                        this.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+                        this.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error renaming class', 'error');
+                    this.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+                    this.disabled = false;
+                });
+            };
+        }
+    </script>
+
+    <!-- Add the function to view student details with profile image support -->
+    <script>
+        // Function to view student details
+        function viewStudentDetails(button) {
+            const studentData = JSON.parse(button.getAttribute('data-student'));
+            console.log('Student Data:', studentData); // Debug log
+            
+            const modal = new bootstrap.Modal(document.getElementById('studentDetailsModal'));
+            const modalBody = document.getElementById('studentDetails');
+            
+            // Build the student details HTML with a modern, attractive layout
+            modalBody.innerHTML = `
+                <div class="student-profile">
+                    <div class="profile-header">
+                        <div class="avatar-circle">
+                            ${studentData.profileImage 
+              ? `<img src="${window.location.origin}/static/${studentData.profileImage}" 
+                       alt="${studentData.studentName}" 
+                       class="profile-thumb"
+                       onclick="showFullImage('${window.location.origin}/static/${studentData.profileImage}')"
+                       onerror="this.src='${window.location.origin}/static/uploads/default.png'" />` 
+                              : `<div class="avatar-text">${studentData.studentName.charAt(0).toUpperCase()}</div>`}
+                        </div>
+                        <div class="header-info">
+                            <h2 class="student-name">${studentData.studentName}</h2>
+                            <div class="student-badges">
+                                <span class="badge bg-primary">
+                                    <i class="fas fa-id-card"></i>
+                                    ${studentData.rollNo}
+                                </span>
+                                <span class="badge bg-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    ${studentData.classSection || 'Unassigned'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Navigation -->
+                    <div class="nav-tabs">
+                        <button class="nav-link active" data-tab="#basicInfo">
+                            <i class="fas fa-user"></i>
+                            Basic Info
+                        </button>
+                        <button class="nav-link" data-tab="#contactInfo">
+                            <i class="fas fa-address-book"></i>
+                            Contact Info
+                        </button>
+                        <button class="nav-link" data-tab="#academicInfo">
+                            <i class="fas fa-graduation-cap"></i>
+                            Academic Info
+                        </button>
+                        <button class="nav-link" data-tab="#additionalInfo">
+                            <i class="fas fa-info-circle"></i>
+                            Additional Info
+                        </button>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content">
+                        <!-- Basic Information Tab -->
+                        <div id="basicInfo" class="tab-pane active">
+                            <div class="detail-section">
+                                <div class="detail-grid">
+                                    <div class="detail-item">
+                                        <span class="detail-label">Registration Number</span>
+                                        <span class="detail-value">${studentData.regNo || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Father's Name</span>
+                                        <span class="detail-value">${studentData.fatherName || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Gender</span>
+                                        <span class="detail-value">${studentData.gender || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Date of Birth</span>
+                                        <span class="detail-value">${studentData.dob || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Religion</span>
+                                        <span class="detail-value">${studentData.religion || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Caste</span>
+                                        <span class="detail-value">${studentData.caste || 'N/A'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information Tab -->
+                        <div id="contactInfo" class="tab-pane">
+                            <div class="detail-section">
+                                <div class="detail-grid">
+                                    <div class="detail-item">
+                                        <span class="detail-label">Address</span>
+                                        <span class="detail-value">${studentData.address || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Student Contact</span>
+                                        <span class="detail-value">${studentData.studentContact || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Parent Contact</span>
+                                        <span class="detail-value">${studentData.parentNo || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Email</span>
+                                        <span class="detail-value">${studentData.email || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">State</span>
+                                        <span class="detail-value">${studentData.state || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">District</span>
+                                        <span class="detail-value">${studentData.district || 'N/A'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Academic Information Tab -->
+                        <div id="academicInfo" class="tab-pane">
+                            <div class="detail-section">
+                                <div class="detail-grid">
+                                    <div class="detail-item">
+                                        <span class="detail-label">Class/Section</span>
+                                        <span class="detail-value">${studentData.classSection || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Year of Admission</span>
+                                        <span class="detail-value">${studentData.yearOfAdmission || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Discipline</span>
+                                        <span class="detail-value">${studentData.discipline1 || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Second Language</span>
+                                        <span class="detail-value">${studentData.lang2 || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">ABC ID</span>
+                                        <span class="detail-value">${studentData.abcId || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">College Email</span>
+                                        <span class="detail-value">${studentData.mailId || 'N/A'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information Tab -->
+                        <div id="additionalInfo" class="tab-pane">
+                            <div class="detail-section">
+                                <div class="detail-grid">
+                                    <div class="detail-item">
+                                        <span class="detail-label">Blood Group</span>
+                                        <span class="detail-value">${studentData.bloodGroup || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">PUC Roll No</span>
+                                        <span class="detail-value">${studentData.pucRollNo || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">PUC Completion Year</span>
+                                        <span class="detail-value">${studentData.pucYear || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">PUC Institute</span>
+                                        <span class="detail-value">${studentData.pucInstitute || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">PUC Percentage</span>
+                                        <span class="detail-value">${studentData.pucPercentage || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Aadhar No</span>
+                                        <span class="detail-value">${studentData.aadharNo || 'N/A'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Initialize tabs functionality
+            const tabLinks = modalBody.querySelectorAll('.nav-link');
+            const tabPanes = modalBody.querySelectorAll('.tab-pane');
+            
+            tabLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    // Remove active class from all tabs and panes
+                    tabLinks.forEach(l => l.classList.remove('active'));
+                    tabPanes.forEach(p => p.classList.remove('active'));
+                    
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    
+                    // Show corresponding pane
+                    const targetId = this.getAttribute('data-tab');
+                    const targetPane = modalBody.querySelector(targetId);
+                    if (targetPane) {
+                        targetPane.classList.add('active');
+                    }
+                });
+            });
+            
+            modal.show();
+        }
+    </script>
+
+    <!-- Add the bulk image upload modal right before the closing body tag -->
+    <div class="modal fade" id="bulkImageUploadModal" tabindex="-1" aria-labelledby="bulkImageUploadModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #4a4a4a, #666666); color: white;">
+                    <h5 class="modal-title" id="bulkImageUploadModalLabel">
+                        <i class="fas fa-images me-2"></i> Bulk Image Upload
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="bulk-image-upload-info mb-4">
+                        <div class="alert alert-info">
+                            <h5><i class="fas fa-info-circle me-2"></i> How to use bulk image upload:</h5>
+                            <ol>
+                                <li>Name each image file with the student's roll number (e.g., <code>bca123.jpg</code>)</li>
+                                <li>Select or drag multiple image files into the upload area</li>
+                                <li>The system will automatically match each image to the corresponding student</li>
+                                <li>Images will be resized and optimized for the system</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div id="bulkImageDropzone" class="dropzone-container">
+                        <div class="dropzone-message text-center">
+                            <i class="fas fa-cloud-upload-alt fa-4x mb-3"></i>
+                            <h4>Drag & Drop Images Here</h4>
+                            <p>or</p>
+                            <label for="bulkImageInput" class="btn btn-primary">
+                                <i class="fas fa-folder-open me-2"></i> Browse Files
+                            </label>
+                            <input type="file" id="bulkImageInput" name="images" multiple accept="image/jpeg, image/png, image/jpg" style="display: none;">
+                        </div>
+                    </div>
+                    <div id="imagePreviewContainer" class="mt-4" style="display: none;">
+                        <h5><i class="fas fa-image me-2"></i> Selected Images</h5>
+                        <div id="imagePreviewGrid" class="row g-3">
+                            <!-- Image previews will be added here -->
+                        </div>
+                    </div>
+                    <div class="upload-progress mt-4 d-none">
+                        <h5><i class="fas fa-spinner me-2"></i> Upload Progress</h5>
+                        <div class="progress">
+                            <div id="imageUploadProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <p id="imageUploadStatusText" class="text-center mt-2">Preparing to upload images...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i> Cancel
+                    </button>
+                    <button type="button" class="btn btn-success" id="startImageUploadBtn" disabled>
+                        <i class="fas fa-upload me-2"></i> Upload Images
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add image upload results modal -->
+    <div class="modal fade" id="imageUploadResultsModal" tabindex="-1" aria-labelledby="imageUploadResultsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="imageUploadResultsModalLabel">
+                        <i class="fas fa-check-circle me-2"></i> Image Upload Complete
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <div class="success-icon">
+                            <i class="fas fa-check-circle fa-5x text-success"></i>
+                        </div>
+                        <h4 class="mt-3 mb-0">Image Upload Results</h4>
+                        <p class="text-muted">Summary of profile images processed</p>
+                    </div>
+                    <div class="row text-center mb-4">
+                        <div class="col-md-4">
+                            <h3 id="totalImagesProcessed">0</h3>
+                            <p>Total Images</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h3 id="successImagesCount" class="text-success">0</h3>
+                            <p>Successfully Uploaded</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h3 id="failedImagesCount" class="text-danger">0</h3>
+                            <p>Failed</p>
+                        </div>
+                    </div>
+                    <div id="uploadErrorSection" class="mt-4" style="display: none;">
+                        <h5 class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i> Errors</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm border">
+                                <thead>
+                                    <tr>
+                                        <th>Filename</th>
+                                        <th>Error</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="errorTableBody">
+                                    <!-- Error rows will be added here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="refreshPage()">Refresh Page</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get DOM elements
+            const bulkImageUploadBtn = document.getElementById('bulkImageUploadBtn');
+            const bulkImageUploadModal = document.getElementById('bulkImageUploadModal');
+            const bulkImageDropzone = document.getElementById('bulkImageDropzone');
+            const bulkImageInput = document.getElementById('bulkImageInput');
+            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+            const imagePreviewGrid = document.getElementById('imagePreviewGrid');
+            const startImageUploadBtn = document.getElementById('startImageUploadBtn');
+            const uploadProgress = document.querySelector('.upload-progress');
+            const progressBar = document.getElementById('imageUploadProgressBar');
+            const statusText = document.getElementById('imageUploadStatusText');
+            
+            // Selected files
+            let selectedFiles = [];
+            
+            // Modal initialization
+            const imageUploadModal = new bootstrap.Modal(document.getElementById('bulkImageUploadModal'));
+            const resultsModal = new bootstrap.Modal(document.getElementById('imageUploadResultsModal'));
+            
+            // Show the modal when button is clicked
+            bulkImageUploadBtn.addEventListener('click', function() {
+                resetUploadUI();
+                imageUploadModal.show();
+            });
+            
+            // Handle drag and drop events
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                bulkImageDropzone.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                bulkImageDropzone.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                bulkImageDropzone.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                bulkImageDropzone.classList.add('drag-over');
+            }
+            
+            function unhighlight() {
+                bulkImageDropzone.classList.remove('drag-over');
+            }
+            
+            // Handle file drop
+            bulkImageDropzone.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFiles(files);
+            }
+            
+            // Handle file input change
+            bulkImageInput.addEventListener('change', function() {
+                handleFiles(this.files);
+            });
+            
+            // Click on dropzone to trigger file input
+            bulkImageDropzone.addEventListener('click', function() {
+                bulkImageInput.click();
+            });
+            
+            // Process the selected files
+            function handleFiles(files) {
+                const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+                const newFiles = Array.from(files).filter(file => validImageTypes.includes(file.type));
+                
+                if (newFiles.length === 0) {
+                    showNotification('Please select valid image files (JPG, PNG)', 'error');
+                    return;
+                }
+                
+                // Add new files to selected files
+                selectedFiles = [...selectedFiles, ...newFiles];
+                
+                // Update UI with selected files
+                updateImagePreview();
+            }
+            
+            // Update image preview
+            function updateImagePreview() {
+                imagePreviewGrid.innerHTML = '';
+                
+                if (selectedFiles.length > 0) {
+                    selectedFiles.forEach((file, index) => {
+                        const reader = new FileReader();
+                        
+                        reader.onload = function(e) {
+                            const previewDiv = document.createElement('div');
+                            previewDiv.className = 'image-preview-item';
+                            previewDiv.innerHTML = `
+                                <img src="${e.target.result}" alt="${file.name}">
+                                <div class="filename">${file.name}</div>
+                                <button type="button" class="remove-btn" data-index="${index}">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            `;
+                            imagePreviewGrid.appendChild(previewDiv);
+                            
+                            // Add event listener to remove button
+                            previewDiv.querySelector('.remove-btn').addEventListener('click', function(e) {
+                                e.stopPropagation();
+                                const fileIndex = parseInt(this.getAttribute('data-index'));
+                                selectedFiles.splice(fileIndex, 1);
+                                updateImagePreview();
+                            });
+                        };
+                        
+                        reader.readAsDataURL(file);
+                    });
+                    
+                    imagePreviewContainer.style.display = 'block';
+                    startImageUploadBtn.disabled = false;
+                } else {
+                    imagePreviewContainer.style.display = 'none';
+                    startImageUploadBtn.disabled = true;
+                }
+            }
+            
+            // Handle upload button click
+            startImageUploadBtn.addEventListener('click', uploadImages);
+            
+            function uploadImages() {
+                if (selectedFiles.length === 0) {
+                    showNotification('Please select at least one image file', 'error');
+                    return;
+                }
+                
+                // Show progress UI
+                uploadProgress.classList.remove('d-none');
+                startImageUploadBtn.disabled = true;
+                progressBar.style.width = '0%';
+                statusText.textContent = 'Preparing to upload images...';
+                
+                // Create FormData object
+                const formData = new FormData();
+                selectedFiles.forEach(file => {
+                    formData.append('images', file);
+                });
+                
+                // Update progress to 10% to indicate preparation is done
+                progressBar.style.width = '10%';
+                statusText.textContent = 'Uploading images...';
+                
+                // Perform the upload
+                fetch('/bulk_image_upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Upload response:', data);
+                    progressBar.style.width = '100%';
+                    statusText.textContent = 'Upload complete!';
+                    
+                    // Hide the current modal and show results
+                    imageUploadModal.hide();
+                    
+                    // Update the results modal with the data
+                    updateResultsModal(data);
+                    
+                    // Show the results modal
+                    resultsModal.show();
+                    
+                    // Reset the upload form
+                    resetUploadUI();
+                })
+                .catch(error => {
+                    console.error('Error uploading images:', error);
+                    progressBar.style.width = '0%';
+                    statusText.textContent = 'Upload failed';
+                    showNotification('Error uploading images: ' + error.message, 'error');
+                    startImageUploadBtn.disabled = false;
+                });
+            }
+            
+            // Update the results modal with data
+            function updateResultsModal(data) {
+                const successCount = data.results.success.length;
+                const errorCount = data.results.errors.length;
+                const totalCount = successCount + errorCount;
+                
+                document.getElementById('totalImagesProcessed').textContent = totalCount;
+                document.getElementById('successImagesCount').textContent = successCount;
+                document.getElementById('failedImagesCount').textContent = errorCount;
+                
+                // Show/hide error section
+                const errorSection = document.getElementById('uploadErrorSection');
+                if (errorCount > 0) {
+                    const errorTableBody = document.getElementById('errorTableBody');
+                    errorTableBody.innerHTML = '';
+                    
+                    data.results.errors.forEach(error => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${error.filename}</td>
+                            <td>${error.error}</td>
+                        `;
+                        errorTableBody.appendChild(row);
+                    });
+                    
+                    errorSection.style.display = 'block';
+                } else {
+                    errorSection.style.display = 'none';
+                }
+            }
+            
+            // Reset the upload UI
+            function resetUploadUI() {
+                selectedFiles = [];
+                imagePreviewGrid.innerHTML = '';
+                imagePreviewContainer.style.display = 'none';
+                uploadProgress.classList.add('d-none');
+                startImageUploadBtn.disabled = true;
+                bulkImageInput.value = '';
+            }
+            
+            // Function to refresh the page
+            window.refreshPage = function() {
+                window.location.reload();
+            };
+        });
+
+function showFullImage(src) {
+    const modal = document.getElementById("imageModal");
+    const fullImage = document.getElementById("fullImage");
+    fullImage.src = src;
+    modal.style.display = "flex";
+}
+
+function hideFullImage() {
+    const modal = document.getElementById("imageModal");
+    modal.style.display = "none";
+}
+
+    </script>
+    <div id="imageModal" class="image-modal" onclick="hideFullImage()">
+    <span class="close-btn" onclick="hideFullImage()">×</span>
+    <img class="modal-content" id="fullImage">
+</div>
+
+</body>
+</html> 

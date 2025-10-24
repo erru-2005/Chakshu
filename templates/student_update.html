@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chakshu - Edit Student</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <style>
+        :root {
+            /* Matching the management page colors */
+            --primary-color: #4a4a4a;        /* Darker grey */
+            --secondary-color: #808080;      /* Medium grey */
+            --accent-color: #ff6b6b;         /* Keep accent color */
+            --success-color: #20c997;        /* Success green */
+            --light-bg: #f5f5f5;            /* Light grey background */
+            --dark-bg: #333333;             /* Dark grey */
+            --text-primary: #333333;        /* Dark text */
+            --text-secondary: #666666;      /* Medium grey text */
+            --border-radius: 10px;
+            --gradient-start: #4a4a4a;      /* Darker grey */
+            --gradient-mid: #666666;        /* Medium grey */
+            --gradient-end: #808080;        /* Light grey */
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            min-height: 100vh;
+        }
+
+        .college-header {
+            background: linear-gradient(135deg, #1a2a3a 0%, #2c3e50 50%, #1a2a3a 100%);
+            padding: 1.5rem 0 1rem;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .college-header::after {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: radial-gradient(ellipse at center, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 70%);
+            transform: rotate(30deg);
+            pointer-events: none;
+        }
+
+        .college-header h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            letter-spacing: 10px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3), 0 0 10px rgba(52, 152, 219, 0.3);
+            margin-bottom: 0.2rem;
+            background: linear-gradient(135deg, #fff 10%, #e0e0e0 90%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            transform: perspective(500px) translateZ(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .college-header h1:hover {
+            transform: perspective(500px) translateZ(10px);
+        }
+
+        .college-header p {
+            font-size: 1.1rem;
+            font-style: italic;
+            letter-spacing: 1px;
+            margin-bottom: 1.2rem;
+            opacity: 0.95;
+            color: #e0e0e0;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .college-header p::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+        }
+
+        .college-info-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transform: translateY(0);
+            transition: all 0.3s ease;
+            flex-wrap: wrap;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+        
+        .college-info-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+            transform: rotate(-15deg);
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .college-info-card:hover::before {
+            opacity: 1;
+        }
+        
+        .college-info-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .college-info-card img {
+            height: 65px;
+            width: auto;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+            transform: rotate(0);
+            transition: all 0.5s ease;
+            border-radius: 50%;
+            padding: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .college-info-card:hover img {
+            transform: rotate(5deg) scale(1.05);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .college-info-card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.2rem;
+            font-weight: 600;
+            color: #ffffff;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+            letter-spacing: 0.5px;
+            text-align: center;
+            width: 100%;
+            transition: all 0.3s ease;
+            position: relative;
+            padding-bottom: 8px;
+        }
+        
+        .college-info-card h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+            transition: width 0.5s ease;
+        }
+        
+        .college-info-card:hover h2::after {
+            width: 80%;
+        }
+
+        .college-info-card p {
+            margin: 0;
+            font-size: 1rem;
+            opacity: 0.9;
+            font-weight: 300;
+            color: rgba(255,255,255,0.9);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .college-info-card:hover p {
+            opacity: 1;
+            letter-spacing: 1px;
+        }
+
+        .project-section {
+            text-align: center;
+            width: 100%;
+        }
+
+        .project-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            margin: 0;
+            letter-spacing: 2px;
+            position: relative;
+            display: block;
+            text-transform: uppercase;
+        }
+
+        .project-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #fff, transparent);
+        }
+
+        .project-tagline {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 300;
+            color: rgba(255,255,255,0.9);
+            margin: 0.25rem 0 0;
+            font-style: italic;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .form-container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            border: 1px solid rgba(134, 198, 227, 0.2);
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #4a4a4a, #666666);
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            margin: 1.5rem 0;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-header i {
+            font-size: 1.2rem;
+        }
+
+        .form-label {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: var(--border-radius);
+            border: 2px solid #e9ecef;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #808080;
+            box-shadow: 0 0 0 0.2rem rgba(128, 128, 128, 0.25);
+            background-color: white;
+        }
+
+        .submit-container {
+            margin-top: 2.5rem;
+            text-align: center;
+            padding: 1rem;
+            background: var(--light-bg);
+            border-radius: var(--border-radius);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #4a4a4a, #666666);
+            color: white;
+            padding: 1rem 3rem;
+            border-radius: var(--border-radius);
+            border: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-submit:hover {
+            background: linear-gradient(135deg, #666666, #4a4a4a);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(74, 74, 74, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4a4a4a, #666666);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            border: none;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover, .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            background: white;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: opacity 0.3s ease;
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, var(--success-color), #2ecc71);
+            color: white;
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, #4a4a4a, #666666);
+            color: white;
+        }
+
+        .error-box {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            color: white;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-top: 1rem;
+            display: none;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #4a4a4a, #666666, #808080);
+            color: white;
+            padding: 1.5rem;
+            border: none;
+        }
+
+        .modal-header .btn-close {
+            color: white;
+            opacity: 0.8;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        .modal-footer .btn {
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-footer .btn-primary {
+            background: linear-gradient(135deg, var(--success-color), #2ecc71);
+            border: none;
+        }
+
+        .modal-footer .btn-secondary {
+            background: linear-gradient(135deg, #4a4a4a, #666666);
+            border: none;
+        }
+
+        #missingFieldsList {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: var(--border-radius);
+            margin-top: 1rem;
+        }
+
+        #missingFieldsList .list-group-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0.75rem 1rem;
+        }
+
+        /* Input group styling */
+        .input-group {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .input-group .form-control {
+            border: none;
+            box-shadow: none;
+        }
+
+        .input-group .btn {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #4a4a4a, #666666);
+            border: none;
+            color: white;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .logo-section {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .college-logo {
+                height: 60px;
+            }
+
+            .college-info h2 {
+                font-size: 1.2rem;
+            }
+
+            .project-title {
+                font-size: 2rem;
+            }
+
+            .project-tagline {
+                font-size: 1rem;
+            }
+
+            .form-container {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Add hover effects for better interactivity */
+        .form-control:hover, .form-select:hover {
+            border-color: #808080;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(74, 74, 74, 0.2);
+        }
+
+        /* Add subtle animation to buttons */
+        .btn {
+            transition: all 0.3s ease;
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Add styles for readonly fields */
+        .form-control[readonly] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+
+        /* Add styles for invalid fields */
+        .is-invalid {
+            border-color: #ff6b6b !important;
+        }
+
+        .invalid-feedback {
+            color: #ff6b6b;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Add loading indicator styles */
+        .loading-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 10px;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .loading-indicator i {
+            font-size: 1.5rem;
+        }
+
+        /* Add success animation styles */
+        .success-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .success-checkmark {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+        }
+
+        .check-icon {
+            width: 80px;
+            height: 80px;
+            position: relative;
+            border-radius: 50%;
+            box-sizing: content-box;
+            border: 4px solid #4CAF50;
+        }
+
+        .check-icon::before {
+            top: 3px;
+            left: -2px;
+            width: 30px;
+            transform-origin: 100% 50%;
+            border-radius: 100px 0 0 100px;
+        }
+
+        .check-icon::after {
+            top: 0;
+            left: 30px;
+            width: 60px;
+            transform-origin: 0 50%;
+            border-radius: 0 100px 100px 0;
+            animation: rotate-circle 4.25s ease-in;
+        }
+
+        .check-icon .icon-line {
+            height: 5px;
+            background-color: #4CAF50;
+            display: block;
+            width: 0;
+            border-radius: 2px;
+            position: absolute;
+            z-index: 10;
+        }
+
+        .check-icon .icon-line.line-tip {
+            top: 46px;
+            left: 14px;
+            width: 25px;
+            transform: rotate(45deg);
+            animation: icon-line-tip 0.75s;
+        }
+
+        .check-icon .icon-line.line-long {
+            top: 38px;
+            right: 8px;
+            width: 47px;
+            transform: rotate(-45deg);
+            animation: icon-line-long 0.75s;
+        }
+
+        .check-icon .icon-circle {
+            top: -4px;
+            left: -4px;
+            z-index: 10;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            position: absolute;
+            box-sizing: content-box;
+            border: 4px solid rgba(76, 175, 80, 0.5);
+        }
+
+        .check-icon .icon-fix {
+            top: 8px;
+            width: 5px;
+            left: 26px;
+            z-index: 1;
+            height: 85px;
+            position: absolute;
+            transform: rotate(-45deg);
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .success-message {
+            color: white;
+            font-size: 1.5rem;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        @keyframes rotate-circle {
+            0% {
+                transform: rotate(-45deg);
+            }
+            5% {
+                transform: rotate(-45deg);
+            }
+            12% {
+                transform: rotate(-405deg);
+            }
+            100% {
+                transform: rotate(-405deg);
+            }
+        }
+
+        @keyframes icon-line-tip {
+            0% {
+                width: 0;
+                left: 1px;
+                top: 19px;
+            }
+            54% {
+                width: 0;
+                left: 1px;
+                top: 19px;
+            }
+            70% {
+                width: 50px;
+                left: -8px;
+                top: 37px;
+            }
+            84% {
+                width: 17px;
+                left: 21px;
+                top: 48px;
+            }
+            100% {
+                width: 25px;
+                left: 14px;
+                top: 46px;
+            }
+        }
+
+        @keyframes icon-line-long {
+            0% {
+                width: 0;
+                right: 46px;
+                top: 54px;
+            }
+            65% {
+                width: 0;
+                right: 46px;
+                top: 54px;
+            }
+            84% {
+                width: 55px;
+                right: 0px;
+                top: 35px;
+            }
+            100% {
+                width: 47px;
+                right: 8px;
+                top: 38px;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #4a4a4a, #666666);
+            color: rgba(255, 255, 255, 0.9);
+            padding: 1rem 0;
+            position: relative;
+            margin-top: 3rem;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+        }
+
+        .footer-content {
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        .footer .separator {
+            margin: 0 1rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .footer strong {
+            color: white;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .footer-content {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .footer .separator {
+                display: none;
+            }
+            
+            .footer span {
+                display: block;
+                margin: 0.25rem 0;
+            }
+        }
+
+        /* Loading Spinner and Animation */
+        .spinner-border {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+
+        /* Notification popup */
+        .notification-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-width: 300px;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            animation: slideIn 0.5s forwards;
+            opacity: 0;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .notification-popup.fadeOut {
+            animation: slideOut 0.5s forwards;
+        }
+
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+        }
+
+        /* Success Checkmark */
+        .success-checkmark {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+            margin-top: 20px;
+        }
+
+        .success-checkmark .check-icon {
+            width: 80px;
+            height: 80px;
+            position: relative;
+            border-radius: 50%;
+            box-sizing: content-box;
+            border: 4px solid #4CAF50;
+        }
+
+        .success-checkmark .check-icon::before {
+            top: 3px;
+            left: -2px;
+            width: 30px;
+            transform-origin: 100% 50%;
+            border-radius: 100px 0 0 100px;
+        }
+
+        .success-checkmark .check-icon::after {
+            top: 0;
+            left: 30px;
+            width: 60px;
+            transform-origin: 0 50%;
+            border-radius: 0 100px 100px 0;
+            animation: rotate-circle 4.25s ease-in;
+        }
+
+        .success-checkmark .check-icon::before, .success-checkmark .check-icon::after {
+            content: '';
+            height: 100px;
+            position: absolute;
+            background: #FFFFFF;
+            transform: rotate(-45deg);
+        }
+
+        .success-checkmark .check-icon .icon-line {
+            height: 5px;
+            background-color: #4CAF50;
+            display: block;
+            border-radius: 2px;
+            position: absolute;
+            z-index: 10;
+        }
+
+        .success-checkmark .check-icon .icon-line.line-tip {
+            top: 46px;
+            left: 14px;
+            width: 25px;
+            transform: rotate(45deg);
+            animation: icon-line-tip 0.75s;
+        }
+
+        .success-checkmark .check-icon .icon-line.line-long {
+            top: 38px;
+            right: 8px;
+            width: 47px;
+            transform: rotate(-45deg);
+            animation: icon-line-long 0.75s;
+        }
+
+        .submit-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="college-header">
+        <div class="container">
+            <div class="text-center text-white">
+                <h1>CHAKSHU</h1>
+                <p>Not just an eye, a vision</p>
+            </div>
+            <div class="college-info-card">
+                <img src="{{ url_for('static', filename='clglogo.png') }}" alt="College Logo">
+                <div class="text-white text-center">
+                    <h2>Dr. B. B. Hegde First Grade College</h2>
+                    <p>Kundapura</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">
+                <i class="fas fa-user-edit"></i> Edit Student Details
+            </h2>
+            <div>
+                <a href="/" class="btn btn-success me-2">
+                    <i class="fas fa-user-plus"></i> Add New Student
+                </a>
+                <a href="/manage" class="btn btn-primary">
+                    <i class="fas fa-users"></i> View All Students
+                </a>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <div class="text-center mb-4">
+                <p class="text-muted">Update the student details below</p>
+            </div>
+
+            <form id="updateForm" onsubmit="return submitUpdateForm()" enctype="multipart/form-data">
+                <div class="section-header">
+                    <i class="fas fa-id-card"></i> Basic Information
+                </div>
+
+                <!-- Profile Image Section -->
+                <div class="mb-3">
+                    <label for="profileImage" class="form-label">
+                        <i class="fas fa-user-circle"></i> Profile Picture
+                    </label>
+                    <div class="d-flex align-items-center">
+                        <div class="profile-preview-container me-3" style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa;">
+                            {% if student.profileImage %}
+                            <img id="profilePreview" src="{{ url_for('static', filename=student.profileImage) }}" alt="Student Photo" style="max-width: 100%; max-height: 100%; object-fit: cover;" onerror="this.src='{{ url_for('static', filename='uploads/default.png') }}'; console.log('Image failed to load, using default');">
+                            {% else %}
+                            <img id="profilePreview" src="{{ url_for('static', filename='default.jpg') }}" alt="No Photo" style="max-width: 100%; max-height: 100%; object-fit: cover;">
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1">
+                            <input type="file" class="form-control" id="profileImage" name="profileImage" accept="image/*" onchange="previewImage(this);">
+                            <div class="form-text">Upload student photo (jpg, png, jpeg). Will be renamed to student roll number.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="regNo" class="form-label">
+                            <i class="fas fa-registered"></i> Reg. No.
+                        </label>
+                        <input type="text" class="form-control" id="regNo" name="regNo" value="{{ student.regNo }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="rollNo" class="form-label">Roll No.</label>
+                        <input type="text" class="form-control" id="rollNo" name="rollNo" value="{{ student.rollNo }}" readonly>
+                    </div>
+                </div>
+
+                <div class="section-header">
+                    <i class="fas fa-user"></i> Personal Details
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="studentName" class="form-label">
+                            <i class="fas fa-user"></i> Student Name
+                        </label>
+                        <input type="text" class="form-control" id="studentName" name="studentName" value="{{ student.studentName }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="fatherName" class="form-label">
+                            <i class="fas fa-user-tie"></i> Father Name
+                        </label>
+                        <input type="text" class="form-control" id="fatherName" name="fatherName" value="{{ student.fatherName }}">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="classSection" class="form-label">Class/Section</label>
+                        <input type="text" class="form-control" id="classSection" name="classSection" value="{{ student.classSection }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="gender" class="form-label">Gender</label>
+                        <select class="form-select" id="gender" name="gender">
+                            <option value="">Select Gender</option>
+                            <option value="Male" {% if student.gender == 'Male' %}selected{% endif %}>Male</option>
+                            <option value="Female" {% if student.gender == 'Female' %}selected{% endif %}>Female</option>
+                            <option value="Other" {% if student.gender == 'Other' %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="dob" class="form-label">Date of Birth</label>
+                        <input type="text" class="form-control" id="dob" name="dob"
+                               pattern="\d{2}-\d{2}-\d{4}" maxlength="10" placeholder="DD-MM-YYYY"
+                               value="{{ student.dob }}"
+                               title="Please enter date in DD-MM-YYYY format"
+                               oninput="formatDate(this)">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ student.email }}">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="address" class="form-label">Address</label>
+                    <textarea class="form-control" id="address" name="address" rows="3">{{ student.address }}</textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="studentContact" class="form-label">Student Contact No.</label>
+                        <input type="tel" class="form-control" id="studentContact" name="studentContact" value="{{ student.studentContact }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="parentNo" class="form-label">Parent Contact No.</label>
+                        <input type="tel" class="form-control" id="parentNo" name="parentNo" value="{{ student.parentNo }}">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="aadharNo" class="form-label">Student Aadhar No.</label>
+                    <input type="text" class="form-control" id="aadharNo" name="aadharNo"
+                           pattern="\d{10}" maxlength="10" placeholder="10-digit Aadhar number"
+                           value="{{ student.aadharNo }}"
+                           title="Please enter a 10-digit Aadhar number"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)">
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="bloodGroup" class="form-label">Blood Group</label>
+                        <select class="form-select" id="bloodGroup" name="bloodGroup">
+                            <option value="">Select Blood Group</option>
+                            {% for group in ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'] %}
+                            <option value="{{ group }}" {% if student.bloodGroup == group %}selected{% endif %}>{{ group }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="state" class="form-label">State</label>
+                        <input type="text" class="form-control" id="state" name="state" value="{{ student.state }}">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="district" class="form-label">District</label>
+                        <input type="text" class="form-control" id="district" name="district" value="{{ student.district }}">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="religion" class="form-label">Religion</label>
+                        <input type="text" class="form-control" id="religion" name="religion" value="{{ student.religion }}">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="category" class="form-label">Category</label>
+                        <input type="text" class="form-control" id="category" name="category" value="{{ student.category }}">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="caste" class="form-label">Caste</label>
+                        <input type="text" class="form-control" id="caste" name="caste" value="{{ student.caste }}">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="income" class="form-label">Income</label>
+                    <input type="number" class="form-control" id="income" name="income" value="{{ student.income }}">
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="pucRollNo" class="form-label">PUC/Equivalent Roll No</label>
+                        <input type="text" class="form-control" id="pucRollNo" name="pucRollNo" value="{{ student.pucRollNo }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="pucYear" class="form-label">PUC/Equivalent Year of Completion</label>
+                        <input type="text" class="form-control" id="pucYear" name="pucYear" value="{{ student.pucYear }}">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="pucInstitute" class="form-label">PUC/Equivalent Institute Name</label>
+                    <input type="text" class="form-control" id="pucInstitute" name="pucInstitute" value="{{ student.pucInstitute }}">
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="pucTotalMarks" class="form-label">PUC/Equivalent Total Marks</label>
+                        <input type="number" class="form-control" id="pucTotalMarks" name="pucTotalMarks" value="{{ student.pucTotalMarks }}">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="pucObtainedMarks" class="form-label">PUC/Equivalent Obtained Marks</label>
+                        <input type="number" class="form-control" id="pucObtainedMarks" name="pucObtainedMarks" value="{{ student.pucObtainedMarks }}">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="pucPercentage" class="form-label">PUC/Equivalent Percentage/CGPA</label>
+                        <input type="number" step="0.01" class="form-control" id="pucPercentage" name="pucPercentage" value="{{ student.pucPercentage }}">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="discipline1" class="form-label">Discipline 1</label>
+                        <input type="text" class="form-control" id="discipline1" name="discipline1" value="{{ student.discipline1 }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="lang2" class="form-label">Lang 2</label>
+                        <input type="text" class="form-control" id="lang2" name="lang2" value="{{ student.lang2 }}">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="yearOfAdmission" class="form-label">Year of Admission</label>
+                        <input type="text" class="form-control" id="yearOfAdmission" name="yearOfAdmission" value="{{ student.yearOfAdmission }}">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="abcId" class="form-label">ABC ID</label>
+                        <input type="text" class="form-control" id="abcId" name="abcId" value="{{ student.abcId }}">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="mailId" class="form-label">Mail ID provided by College</label>
+                        <input type="email" class="form-control" id="mailId" name="mailId" value="{{ student.mailId }}">
+                    </div>
+                </div>
+
+                <div class="submit-container">
+                    <button type="submit" class="btn btn-submit" id="updateButton">
+                        <i class="fas fa-save me-2"></i> Update Student Information
+                    </button>
+                    <div class="spinner-border text-light ms-2 d-none" id="updateSpinner" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Warning Modal -->
+    <div class="modal fade" id="warningModal" tabindex="-1" aria-labelledby="warningModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title" id="warningModalLabel">
+                        <i class="fas fa-exclamation-triangle"></i> Warning
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="warningMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Confirmation Modal -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success">
+                    <h5 class="modal-title" id="confirmationModalLabel">
+                        <i class="fas fa-check-circle"></i> Update Confirmation
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="confirmation-icon text-center mb-4">
+                        <i class="fas fa-user-edit fa-4x text-success"></i>
+                    </div>
+                    <div id="confirmationMessage" class="text-center mb-3"></div>
+                    <div id="missingFieldsContainer" class="mt-3" style="display: none;">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i> <strong>Warning:</strong> The following fields are not filled:
+                        </div>
+                        <ul id="missingFieldsList" class="list-group list-group-flush"></ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="proceedButton">Update Student</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Image preview function
+        function previewImage(input) {
+            const preview = document.getElementById('profilePreview');
+            const file = input.files[0];
+            
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        }
+        // Create modal instance
+        const warningModal = new bootstrap.Modal(document.getElementById('warningModal'));
+        const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+
+        function showWarning(message) {
+            document.getElementById('warningMessage').textContent = message;
+            warningModal.show();
+        }
+
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification-popup ${type}`;
+            
+            // Add appropriate icon
+            let icon = 'info-circle';
+            if (type === 'success') icon = 'check-circle';
+            if (type === 'error') icon = 'exclamation-circle';
+            if (type === 'warning') icon = 'exclamation-triangle';
+            
+            // Add content with close button
+            notification.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-${icon} me-2"></i>
+                    <span>${message}</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white ms-3" onclick="this.parentElement.classList.add('fadeOut'); setTimeout(() => this.parentElement.remove(), 500);"></button>
+            `;
+            
+            // Add to document
+            document.body.appendChild(notification);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.classList.add('fadeOut');
+                    setTimeout(() => notification.remove(), 500);
+                }
+            }, 5000);
+        }
+
+        function showError(message) {
+            const errorBox = document.createElement('div');
+            errorBox.className = 'error-box';
+            errorBox.textContent = message;
+            
+            const formContainer = document.querySelector('.form-container');
+            formContainer.insertBefore(errorBox, formContainer.firstChild);
+            
+            errorBox.style.display = 'block';
+            
+            setTimeout(() => {
+                errorBox.style.display = 'none';
+                errorBox.remove();
+            }, 3000);
+        }
+
+        // Required fields list
+        const requiredFields = [
+            { id: 'rollNo', label: 'Roll No.' }
+        ];
+
+        function checkRequiredFields() {
+            const missingFields = [];
+            
+            requiredFields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (!element.value.trim()) {
+                    missingFields.push(field.label);
+                    element.classList.add('is-invalid');
+                } else {
+                    element.classList.remove('is-invalid');
+                }
+            });
+            
+            return missingFields;
+        }
+
+        function showConfirmation(message, missingFields = []) {
+            document.getElementById('confirmationMessage').innerHTML = `<i class="fas fa-question-circle"></i> ${message}`;
+            
+            const missingFieldsContainer = document.getElementById('missingFieldsContainer');
+            const missingFieldsList = document.getElementById('missingFieldsList');
+            
+            // Get all form fields
+            const form = document.getElementById('updateForm');
+            const formFields = form.querySelectorAll('input, select, textarea');
+            const emptyFields = [];
+            
+            // Check which fields are empty
+            formFields.forEach(field => {
+                if (field.type !== 'submit' && field.type !== 'button' && !field.readOnly) {
+                    const fieldName = field.name;
+                    const fieldLabel = field.previousElementSibling ? field.previousElementSibling.textContent.trim() : fieldName;
+                    
+                    if (!field.value.trim()) {
+                        emptyFields.push(fieldLabel);
+                    }
+                }
+            });
+            
+            if (emptyFields.length > 0) {
+                missingFieldsContainer.style.display = 'block';
+                missingFieldsList.innerHTML = '';
+                
+                // Create a more visually appealing list with icons and colors
+                emptyFields.forEach(field => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item text-danger';
+                    li.innerHTML = `<i class="fas fa-times-circle"></i> ${field}`;
+                    missingFieldsList.appendChild(li);
+                });
+                
+                document.getElementById('proceedButton').innerHTML = '<i class="fas fa-exclamation-triangle"></i> Proceed Anyway';
+                document.getElementById('proceedButton').style.display = 'block';
+            } else {
+                missingFieldsContainer.style.display = 'none';
+                document.getElementById('proceedButton').innerHTML = '<i class="fas fa-check-circle"></i> Update Student';
+                document.getElementById('proceedButton').style.display = 'block';
+            }
+            
+            confirmationModal.show();
+        }
+
+        function submitUpdateForm() {
+            const form = document.getElementById('updateForm');
+            const updateBtn = document.getElementById('updateButton');
+            const spinner = document.getElementById('updateSpinner');
+            
+            // Show loading animation
+            updateBtn.disabled = true;
+            spinner.classList.remove('d-none');
+            
+            // Get rollNo for the API endpoint
+            const rollNo = document.getElementById('rollNo').value;
+            
+            // Use FormData to handle file uploads properly
+            const formData = new FormData(form);
+            
+            // Log what's being sent for debugging
+            console.log("Form data being sent for roll number:", rollNo);
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + (pair[1] instanceof File ? pair[1].name : pair[1]));
+            }
+            
+            // Use fetch API to send the form data including files
+            fetch(`/edit_student/${rollNo}`, {
+                method: 'POST',
+                body: formData // No Content-Type header needed - browser sets it with boundary
+            })
+            .then(response => {
+                // Handle redirects manually since we're using fetch
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return { success: true, redirected: true };
+                }
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+                }
+                return response.json().catch(() => ({ success: true })); // Handle non-JSON responses
+            })
+            .then(result => {
+                // Don't proceed if we were redirected
+                if (result.redirected) return;
+                
+                // Hide loading
+                updateBtn.disabled = false;
+                spinner.classList.add('d-none');
+                
+                console.log("Server response:", result);
+                
+                if (result.success) {
+                    // Show success notification
+                    showNotification(result.message || 'Student data updated successfully!', 'success');
+                    
+                    // Show success animation
+                    const successAnimation = document.createElement('div');
+                    successAnimation.className = 'success-animation';
+                    successAnimation.innerHTML = `
+                        <div class="success-checkmark">
+                            <div class="check-icon">
+                                <span class="icon-line line-tip"></span>
+                                <span class="icon-line line-long"></span>
+                                <div class="icon-circle"></div>
+                                <div class="icon-fix"></div>
+                            </div>
+                        </div>
+                        <div class="success-message">Student Updated Successfully!</div>
+                    `;
+                    document.body.appendChild(successAnimation);
+                    
+                    // Redirect to the management page after a delay
+                    setTimeout(() => {
+                        window.location.href = '/manage';
+                    }, 2000);
+                } else {
+                    // Show error notification
+                    showNotification(`Error: ${result.error || 'Unknown error'}`, 'error');
+                }
+            })
+            .catch(error => {
+                // Hide loading
+                updateBtn.disabled = false;
+                spinner.classList.add('d-none');
+                
+                console.error('Error:', error);
+                showNotification(`Error: ${error.message}`, 'error');
+            });
+            
+            // Prevent the form from submitting normally
+            return false;
+        }
+
+        function formatDate(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value.length > 2) value = value.slice(0, 2) + '-' + value.slice(2);
+            if (value.length > 5) value = value.slice(0, 5) + '-' + value.slice(5, 9);
+            input.value = value;
+        }
+    </script>
+    <!-- Add Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p class="mb-0">
+                    <span class="developer">Developed by <strong>Swasthik N Rao</strong></span>
+                    <span class="separator">|</span>
+                    <span class="guidance">Under the guidance of <strong>Mr. Pranam R Betrabet</strong></span>
+                </p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html> 
