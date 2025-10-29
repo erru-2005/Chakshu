@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, url_for, flash, redirect, send_file
+from flask import Flask, render_template, request, jsonify, url_for, flash, redirect, send_file, session
 import os
 from dotenv import load_dotenv
 import json
@@ -9,14 +9,19 @@ from io import BytesIO
 from openpyxl import Workbook
 from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.styles import PatternFill, Border, Side
+from functools import wraps
+from db import generate_otp, save_otp, verify_otp, get_student_mobile
+from twilio.rest import Client
 
 # Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
 
-# Add secret key for flash messages
+# Add secret key for flash messages and session
 app.secret_key = os.environ.get('SECRET_KEY', 'default_secret_key_for_development')
+app.config['SESSION_PERMANENT'] = False
+app.config['SESSION_TYPE'] = 'filesystem'
 
 # Configure upload folder
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
@@ -36,7 +41,236 @@ def save_students(students):
     with open(STUDENTS_JSON, 'w') as f:
         json.dump(students, f, indent=4)
 
+def login_required(f):
+    """Decorator to check if user is logged in"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'logged_in' not in session or not session['logged_in']:
+            return redirect(url_for('login_page'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# Login Routes
+@app.route('/login')
+def login_page():
+    """Render the login page"""
+    if 'logged_in' in session and session.get('logged_in'):
+        return redirect(url_for('dashboard'))
+    return render_template('login.html')
+
+@app.route('/api/login', methods=['POST'])
+def api_login():
+    """Verify roll number and DOB"""
+    try:
+        data = request.json
+        roll_no = data.get('rollNo', '').strip()
+        dob = data.get('dob', '').strip()
+        
+        if not roll_no or not dob:
+            return jsonify({'success': False, 'error': 'Roll number and DOB are required'}), 400
+        
+        # Load students from JSON
+        students = load_students()
+        student = next((s for s in students if s.get('rollNo', '').upper() == roll_no.upper()), None)
+        
+        if not student:
+            return jsonify({'success': False, 'error': 'Invalid roll number'}), 404
+        
+        # Compare DOB - normalize both formats
+        student_dob = str(student.get('dob', '')).strip()
+        
+        # Try different date formats
+        dob_normalized = dob.replace('/', '-').replace('.', '-')
+        student_dob_normalized = student_dob.replace('/', '-').replace('.', '-')
+        
+        if dob_normalized.lower() != student_dob_normalized.lower():
+            return jsonify({'success': False, 'error': 'Invalid date of birth'}), 401
+        
+        # Store roll number in session for next steps
+        session['roll_no'] = roll_no.upper()
+        session['student_data'] = student
+        
+        return jsonify({'success': True, 'message': 'Credentials verified'}), 200
+        
+    except Exception as e:
+        print(f"Error in api_login: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/send-otp', methods=['POST'])
+def api_send_otp():
+    """Send OTP to the already verified mobile number for the roll number"""
+    try:
+        data = request.json
+        roll_no = (data.get('rollNo') or '').strip()
+
+        if not roll_no:
+            return jsonify({'success': False, 'error': 'Roll number is required'}), 400
+
+        # Check if roll_no matches session
+        if 'roll_no' not in session or session['roll_no'].upper() != roll_no.upper():
+            return jsonify({'success': False, 'error': 'Session expired. Please login again.'}), 401
+
+        # Fetch verified mobile from MongoDB, otherwise fall back to parentNo from JSON
+        mobile = get_student_mobile(roll_no.upper())
+        if not mobile:
+            # Fallback: read parentNo from students.json
+            students = load_students()
+            student = next((s for s in students if s.get('rollNo', '').upper() == roll_no.upper()), None)
+            if student:
+                fallback = str(student.get('parentNo') or '').strip()
+                # Normalize fallback number by removing spaces and hyphens
+                fallback_clean = ''.join(c for c in fallback if c.isdigit())
+                # Use only if it looks like an Indian 10-digit number
+                if len(fallback_clean) == 10 and fallback_clean[0] in ['6','7','8','9']:
+                    mobile = fallback_clean
+            
+        if not mobile:
+            return jsonify({'success': False, 'error': 'No verified mobile found for this roll number.'}), 403
+
+        # Generate and save OTP
+        otp = generate_otp(6)
+        save_otp(mobile, roll_no.upper(), otp)
+
+        # Store mobile in session
+        session['mobile'] = mobile
+
+        # Prepare masked mobile for display (e.g., +91 XXXXXXX123)
+        # Build masked number based on last 3 digits of the cleaned number
+        last_three = ''.join(c for c in str(mobile) if c.isdigit())[-3:]
+        masked = f"+91 {'X'*7}{last_three}" if last_three else "+91 **********"
+
+        # Send OTP via Twilio SMS
+        try:
+            # Get Twilio credentials from environment variables
+            account_sid = os.environ.get('account_sid')
+            auth_token = os.environ.get('auth_token')
+            twilio_number = os.environ.get('twilio_number')
+            
+            if not all([account_sid, auth_token, twilio_number]):
+                print("Warning: Twilio credentials not found in .env file. OTP will not be sent via SMS.")
+                print(f"OTP for {roll_no} to {mobile}: {otp}")  # Fallback: Print OTP for testing
+            else:
+                # Format mobile number (ensure it starts with +91)
+                # Remove all spaces, dashes, and other non-digit characters (except +)
+                recipient_number = ''.join(c for c in mobile.strip() if c.isdigit() or c == '+')
+                
+                if not recipient_number.startswith('+91'):
+                    # Remove leading + if present for processing
+                    clean_number = recipient_number.lstrip('+')
+                    
+                    # Remove leading 91 if present (India country code)
+                    if clean_number.startswith('91') and len(clean_number) > 10:
+                        clean_number = clean_number[2:]
+                    
+                    # Remove leading 0 if present
+                    if clean_number.startswith('0'):
+                        clean_number = clean_number[1:]
+                    
+                    # Ensure it's a 10-digit number, then add +91
+                    if len(clean_number) == 10 and clean_number.isdigit():
+                        recipient_number = '+91' + clean_number
+                    else:
+                        raise ValueError(f"Invalid mobile number format: {mobile}")
+                
+                # Create Twilio client
+                client = Client(account_sid, auth_token)
+                
+                # Send the OTP message
+                message = client.messages.create(
+                    body=f"Your OTP for CHAKSHU Portal is: {otp}. Valid for 10 minutes. Do not share this OTP with anyone.",
+                    from_=twilio_number,
+                    to=recipient_number
+                )
+                
+                print(f"OTP SMS sent successfully to {recipient_number}. Message SID: {message.sid}")
+        
+        except Exception as sms_error:
+            # If SMS sending fails, log the error but don't fail the request
+            print(f"Failed to send SMS via Twilio: {str(sms_error)}")
+            print(f"OTP for {roll_no} to {mobile}: {otp}")  # Fallback: Print OTP for debugging
+            
+        return jsonify({
+            'success': True,
+            'message': 'OTP sent successfully',
+            'maskedMobile': masked
+        }), 200
+
+    except Exception as e:
+        print(f"Error in api_send_otp: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/verify-otp', methods=['POST'])
+def api_verify_otp():
+    """Verify OTP and complete login"""
+    try:
+        data = request.json
+        roll_no = data.get('rollNo', '').strip()
+        entered_otp = data.get('otp', '').strip()
+        
+        if not roll_no or not entered_otp:
+            return jsonify({'success': False, 'error': 'All fields are required'}), 400
+        
+        if len(entered_otp) != 6:
+            return jsonify({'success': False, 'error': 'OTP must be 6 digits'}), 400
+        
+        # Determine mobile (from session or DB) and verify OTP using MongoDB
+        mobile = session.get('mobile') or get_student_mobile(roll_no.upper())
+        if not mobile:
+            return jsonify({'success': False, 'error': 'Verified mobile not found'}), 403
+
+        if verify_otp(mobile, roll_no.upper(), entered_otp):
+            # Load student data
+            students = load_students()
+            student = next((s for s in students if s.get('rollNo', '').upper() == roll_no.upper()), None)
+            
+            if student:
+                # Set session
+                session['logged_in'] = True
+                session['roll_no'] = roll_no.upper()
+                session['mobile'] = mobile
+                session['student_data'] = student
+                
+                return jsonify({'success': True, 'message': 'Login successful'}), 200
+            else:
+                return jsonify({'success': False, 'error': 'Student not found'}), 404
+        else:
+            return jsonify({'success': False, 'error': 'Invalid OTP'}), 401
+        
+    except Exception as e:
+        print(f"Error in api_verify_otp: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/logout')
+def logout():
+    """Logout user"""
+    session.clear()
+    return redirect(url_for('login_page'))
+
 @app.route('/')
+@login_required
+def dashboard():
+    """Student dashboard/home page"""
+    try:
+        roll_no = session.get('roll_no')
+        if not roll_no:
+            return redirect(url_for('login_page'))
+        
+        # Load student data from JSON
+        students = load_students()
+        student = next((s for s in students if s.get('rollNo', '').upper() == roll_no.upper()), None)
+        
+        if not student:
+            session.clear()
+            return redirect(url_for('login_page'))
+        
+        return render_template('dashboard.html', student=student)
+        
+    except Exception as e:
+        print(f"Error in dashboard: {str(e)}")
+        session.clear()
+        return redirect(url_for('login_page'))
+
+@app.route('/admin')
 def index():
     return render_template('student_form.html')
 

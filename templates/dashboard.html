@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - {{ student.studentName }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f0f10 0%, #1a1a1c 100%);
+            min-height: 100vh;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+        .profile-image {
+            border: 4px solid white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .gradient-text {
+            background: linear-gradient(180deg, #4F46E5 0%, #9333EA 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+    </style>
+</head>
+<body class="min-h-screen py-4 px-4">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="glass-effect rounded-2xl p-4 mb-6 shadow-xl">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center space-x-4 mb-4 md:mb-0">
+                    <span class="inline-block" aria-hidden="true">
+                        <svg width="56" height="56" viewBox="0 0 640 640" xmlns="http://www.w3.org/2000/svg">
+                          <defs>
+                            <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stop-color="#4F46E5"/>
+                              <stop offset="100%" stop-color="#9333EA"/>
+                            </linearGradient>
+                            <linearGradient id="badgeGrad" x1="0" y1="0" x2="1" y2="1">
+                              <stop offset="0%" stop-color="#6366F1"/>
+                              <stop offset="100%" stop-color="#8B5CF6"/>
+                            </linearGradient>
+                            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                              <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#00000040"/>
+                            </filter>
+                          </defs>
+                          <path fill="url(#grad)" filter="url(#shadow)"
+                            d="M337.3 51C325.9 48.7 314.2 48.7 302.8 51L115.3 88.5C104.1 90.7 96 100.6 96 112C96 122.3 102.5 131.3 112 134.6L112 208L96.3 286.6C96.1 287.5 96 288.5 96 289.5C96 297.5 102.5 304.1 110.6 304.1L145.5 304.1C153.5 304.1 160.1 297.6 160.1 289.5C160.1 288.5 160 287.6 159.8 286.6L144 208L144 141.3L192 150.9L192 208C192 278.7 249.3 336 320 336C390.7 336 448 278.7 448 208L448 150.9L524.7 135.6C535.9 133.3 544 123.4 544 112C544 100.6 535.9 90.7 524.7 88.5L337.3 51zM320 288C275.8 288 240 252.2 240 208L400 208C400 252.2 364.2 288 320 288zM216.1 384.1C154.7 412.3 112 474.3 112 546.3C112 562.7 125.3 576 141.7 576L296 576L296 430L238.6 387C232.1 382.1 223.4 380.8 216 384.2zM344 576L498.3 576C514.7 576 528 562.7 528 546.3C528 474.3 485.3 412.3 423.9 384.2C416.5 380.8 407.8 382.1 401.3 387L343.9 430L343.9 576z"/>
+                          <circle cx="460" cy="370" r="68" fill="#ffffff40" filter="url(#shadow)" />
+                          <circle cx="460" cy="370" r="60" fill="url(#badgeGrad)" stroke="#ffffff" stroke-width="5"/>
+                          <text x="460" y="396" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="80" fill="#ffffff" font-weight="bold">i</text>
+                        </svg>
+                    </span>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-extrabold tracking-wide text-gray-900">CHAKSHU</h1>
+                        <p class="text-gray-600 text-sm">Welcome, {{ student.studentName }}</p>
+                    </div>
+                </div>
+                <a href="/logout" class="text-gray-800 hover:text-black font-semibold transition duration-200">Logout</a>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column: Profile Card -->
+            <div class="lg:col-span-1">
+                <div class="glass-effect rounded-2xl p-6 shadow-xl card-hover">
+                    <div class="text-center">
+                        <!-- Profile Image -->
+                        <div class="mb-4 flex justify-center">
+                            {% if student.profileImage %}
+                            <img src="{{ url_for('static', filename=student.profileImage) }}" 
+                                 alt="Profile" 
+                                 class="w-32 h-32 rounded-full object-cover profile-image">
+                            {% else %}
+                            <div class="w-32 h-32 rounded-full bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center profile-image">
+                                <i class="fas fa-user text-5xl text-white"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Student Name -->
+                        <h2 class="text-2xl font-extrabold text-gray-900 mb-1 tracking-wide">{{ student.studentName }}</h2>
+                        <p class="text-gray-600 mb-4 uppercase">{{ student.programName or 'Student' }}</p>
+                        
+                        <!-- Quick Info -->
+                        <div class="space-y-3 mt-6">
+                            <div class="bg-gray-100 rounded-lg p-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-600"><i class="fas fa-id-card mr-2"></i>Roll No:</span>
+                                    <span class="font-semibold text-gray-800">{{ student.rollNo }}</span>
+                                </div>
+                            </div>
+                            
+                            {% if student.regNo %}
+                            <div class="bg-gray-100 rounded-lg p-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-600"><i class="fas fa-certificate mr-2"></i>Reg No:</span>
+                                    <span class="font-semibold text-gray-800">{{ student.regNo }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="bg-gray-100 rounded-lg p-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-600"><i class="fas fa-users mr-2"></i>Class:</span>
+                                    <span class="font-semibold text-gray-800">{{ student.classSection }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Details -->
+            <div class="lg:col-span-2">
+                <!-- Personal Information -->
+                <div class="glass-effect rounded-2xl p-6 mb-6 shadow-xl card-hover">
+                    <h3 class="text-xl font-extrabold text-gray-900 mb-4 flex items-center tracking-wide">
+                        <i class="fas fa-user-circle mr-2 gradient-text"></i>Personal Information
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-venus-mars gradient-text mr-2"></i>
+                                <span class="text-sm text-gray-600">Gender</span>
+                            </div>
+                            <p class="text-gray-800 font-semibold">{{ student.gender }}</p>
+                        </div>
+                        
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-birthday-cake gradient-text mr-2"></i>
+                                <span class="text-sm text-gray-600">Date of Birth</span>
+                            </div>
+                            <p class="text-gray-800 font-semibold">{{ student.dob }}</p>
+                        </div>
+                        
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-tint gradient-text mr-2"></i>
+                                <span class="text-sm text-gray-600">Blood Group</span>
+                            </div>
+                            <p class="text-gray-800 font-semibold">{{ student.bloodGroup or 'N/A' }}</p>
+                        </div>
+                        
+                        {% if student.category %}
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-tag gradient-text mr-2"></i>
+                                <span class="text-sm text-gray-600">Category</span>
+                            </div>
+                            <p class="text-gray-800 font-semibold">{{ student.category }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="glass-effect rounded-2xl p-6 mb-6 shadow-xl card-hover">
+                    <h3 class="text-xl font-extrabold text-gray-900 mb-4 flex items-center tracking-wide">
+                        <i class="fas fa-address-book mr-2 gradient-text"></i>Contact Information
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% if student.email %}
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-envelope gradient-text mr-2"></i>
+                                <span class="text-sm text-gray-600">Email</span>
+                            </div>
+                            <p class="text-gray-800 font-semibold break-all">{{ student.email }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if student.studentContact %}
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-phone gradient-text mr-2"></i>
+                                <span class="text-sm text-gray-600">Student Contact</span>
+                            </div>
+                            <p class="text-gray-800 font-semibold">+91 {{ student.studentContact }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if student.parentNo %}
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-user-friends gradient-text mr-2"></i>
+                                <span class="text-sm text-gray-600">Parent Contact</span>
+                            </div>
+                            <p class="text-gray-800 font-semibold">+91 {{ student.parentNo }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if student.address %}
+                        <div class="bg-gray-50 rounded-lg p-4 md:col-span-2">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-map-marker-alt gradient-text mr-2"></i>
+                                <span class="text-sm text-gray-600">Address</span>
+                            </div>
+                            <p class="text-gray-800 font-semibold">{{ student.address }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Academic Information -->
+                <div class="glass-effect rounded-2xl p-6 mb-6 shadow-xl card-hover">
+                    <h3 class="text-xl font-extrabold text-gray-900 mb-4 flex items-center tracking-wide">
+                        <i class="fas fa-graduation-cap mr-2 gradient-text"></i>Academic Information
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% if student.fatherName %}
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-male gradient-text mr-2"></i>
+                                <span class="text-sm text-gray-600">Father's Name</span>
+                            </div>
+                            <p class="text-gray-800 font-semibold">{{ student.fatherName }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if student.pucInstitute %}
+                        <div class="bg-gray-50 rounded-lg p-4 md:col-span-2">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-school gradient-text mr-2"></i>
+                                <span class="text-sm text-gray-600">Previous Institute</span>
+                            </div>
+                            <p class="text-gray-800 font-semibold">{{ student.pucInstitute }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if student.pucPercentage %}
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-percentage gradient-text mr-2"></i>
+                                <span class="text-sm text-gray-600">PUC Percentage</span>
+                            </div>
+                            {% set _pct = ("%.2f"|format((student.pucPercentage|string)|float)) %}
+                            <p class="text-gray-800 font-semibold">{% if _pct.endswith('00') %}{{ _pct[:-3] }}{% else %}{{ _pct }}{% endif %}%</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if student.pucYear %}
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-calendar gradient-text mr-2"></i>
+                                <span class="text-sm text-gray-600">PUC Year</span>
+                            </div>
+                            <p class="text-gray-800 font-semibold">{{ student.pucYear }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Additional Information -->
+                {% if student.state or student.district or student.religion or student.caste or student.abcId %}
+                <div class="glass-effect rounded-2xl p-6 mb-6 shadow-xl card-hover">
+                    <h3 class="text-xl font-extrabold text-gray-900 mb-4 flex items-center tracking-wide">
+                        <i class="fas fa-info-circle mr-2 gradient-text"></i>Additional Information
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% if student.state %}
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-map gradient-text mr-2"></i>
+                                <span class="text-sm text-gray-600">State</span>
+                            </div>
+                            <p class="text-gray-800 font-semibold">{{ student.state }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if student.district %}
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-map-pin gradient-text mr-2"></i>
+                                <span class="text-sm text-gray-600">District</span>
+                            </div>
+                            <p class="text-gray-800 font-semibold">{{ student.district }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if student.religion %}
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-place-of-worship gradient-text mr-2"></i>
+                                <span class="text-sm text-gray-600">Religion</span>
+                            </div>
+                            <p class="text-gray-800 font-semibold">{{ student.religion }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if student.caste %}
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-users gradient-text mr-2"></i>
+                                <span class="text-sm text-gray-600">Caste</span>
+                            </div>
+                            <p class="text-gray-800 font-semibold">{{ student.caste }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if student.abcId %}
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-qrcode gradient-text mr-2"></i>
+                                <span class="text-sm text-gray-600">ABC ID</span>
+                            </div>
+                            <p class="text-gray-800 font-semibold">{{ student.abcId }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center text-white mt-6">
+            <p class="text-sm opacity-75">© 2024 Student Portal. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>
+
+<!-- Toast Notification -->
+<div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 hidden">
+    <div id="toastContent" class="flex items-center gap-3 px-5 py-3 rounded-xl shadow-xl bg-white border">
+        <i id="toastIcon" class="fas fa-info-circle text-gray-600"></i>
+        <span id="toastMessage" class="text-gray-800 font-medium"></span>
+    </div>
+</div>
+
+<script>
+    function showToast(message, type = 'info') {
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toastMessage');
+        const toastIcon = document.getElementById('toastIcon');
+        const toastContent = document.getElementById('toastContent');
+        
+        toastMsg.textContent = message;
+        toastIcon.className = '';
+        toastContent.className = 'flex items-center gap-3 px-5 py-3 rounded-xl shadow-xl bg-white border';
+        
+        if (type === 'success') {
+            toastIcon.className = 'fas fa-check-circle text-green-600';
+            toastContent.className += ' border-green-200';
+        } else if (type === 'error') {
+            toastIcon.className = 'fas fa-times-circle text-red-600';
+            toastContent.className += ' border-red-200';
+        } else if (type === 'warning') {
+            toastIcon.className = 'fas fa-exclamation-triangle text-amber-600';
+            toastContent.className += ' border-amber-200';
+        } else {
+            toastIcon.className = 'fas fa-info-circle text-gray-600';
+            toastContent.className += ' border-gray-200';
+        }
+        
+        toast.classList.remove('hidden');
+        
+        clearTimeout(window.__toastTimer);
+        window.__toastTimer = setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 2500);
+    }
+</script>
+

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHAKSHU - Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f0f10 0%, #1a1a1c 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        .otp-input {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .otp-input:focus {
+            border-color: #6366F1;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+        .gradient-text {
+            background: linear-gradient(180deg, #4F46E5 0%, #9333EA 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        @media (max-width: 640px) {
+            .otp-input {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <div class="glass-effect rounded-2xl p-8 shadow-xl">
+            <!-- Step 1: Roll Number and DOB -->
+            <div id="step1" class="step-content">
+                <div class="text-center mb-6">
+                    <span class="inline-block mb-3" aria-hidden="true">
+                        <svg width="72" height="72" viewBox="0 0 640 640" xmlns="http://www.w3.org/2000/svg">
+                          <defs>
+                            <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stop-color="#4F46E5"/>
+                              <stop offset="100%" stop-color="#9333EA"/>
+                            </linearGradient>
+                            <linearGradient id="badgeGrad" x1="0" y1="0" x2="1" y2="1">
+                              <stop offset="0%" stop-color="#6366F1"/>
+                              <stop offset="100%" stop-color="#8B5CF6"/>
+                            </linearGradient>
+                            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                              <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#00000040"/>
+                            </filter>
+                          </defs>
+                          <path fill="url(#grad)" filter="url(#shadow)"
+                            d="M337.3 51C325.9 48.7 314.2 48.7 302.8 51L115.3 88.5C104.1 90.7 96 100.6 96 112C96 122.3 102.5 131.3 112 134.6L112 208L96.3 286.6C96.1 287.5 96 288.5 96 289.5C96 297.5 102.5 304.1 110.6 304.1L145.5 304.1C153.5 304.1 160.1 297.6 160.1 289.5C160.1 288.5 160 287.6 159.8 286.6L144 208L144 141.3L192 150.9L192 208C192 278.7 249.3 336 320 336C390.7 336 448 278.7 448 208L448 150.9L524.7 135.6C535.9 133.3 544 123.4 544 112C544 100.6 535.9 90.7 524.7 88.5L337.3 51zM320 288C275.8 288 240 252.2 240 208L400 208C400 252.2 364.2 288 320 288zM216.1 384.1C154.7 412.3 112 474.3 112 546.3C112 562.7 125.3 576 141.7 576L296 576L296 430L238.6 387C232.1 382.1 223.4 380.8 216 384.2zM344 576L498.3 576C514.7 576 528 562.7 528 546.3C528 474.3 485.3 412.3 423.9 384.2C416.5 380.8 407.8 382.1 401.3 387L343.9 430L343.9 576z"/>
+                          <circle cx="460" cy="370" r="68" fill="#ffffff40" filter="url(#shadow)" />
+                          <circle cx="460" cy="370" r="60" fill="url(#badgeGrad)" stroke="#ffffff" stroke-width="5"/>
+                          <text x="460" y="396" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="80" fill="#ffffff" font-weight="bold">i</text>
+                        </svg>
+                    </span>
+                    <h2 class="text-3xl font-extrabold tracking-wide text-gray-900 mb-1">CHAKSHU</h2>
+                    <p class="text-gray-600 font-medium">Enter your credentials to continue</p>
+                </div>
+                
+                <form id="loginForm1" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">
+                            <i class="fas fa-id-card mr-2"></i>Roll Number
+                        </label>
+                        <input type="text" id="rollNo" name="rollNo" required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent transition"
+                            placeholder="Enter your roll number">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">
+                            <i class="fas fa-calendar-alt mr-2"></i>Date of Birth
+                        </label>
+                        <input type="text" id="dob" name="dob" required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent transition"
+                            placeholder="DD-MM-YYYY" pattern="\d{2}-\d{2}-\d{4}">
+                        <p class="text-xs text-gray-500 mt-1">Format: DD-MM-YYYY</p>
+                    </div>
+                    
+                    <div id="step1Error" class="hidden text-red-600 text-sm bg-red-50 p-3 rounded-lg"></div>
+                    
+                    <button type="submit" class="w-full bg-black text-white py-3 rounded-lg font-bold hover:bg-gray-900 transition duration-200 transform hover:scale-105">
+                        <i class="fas fa-arrow-right mr-2"></i>Continue
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Step 2: OTP Verification -->
+            <div id="step2" class="step-content hidden">
+                <div class="text-center mb-6">
+                    <i class="fas fa-key text-5xl gradient-text mb-4"></i>
+                    <h2 class="text-3xl font-extrabold text-gray-900 mb-2 tracking-wide">OTP Verification</h2>
+                    <p class="text-gray-600">Enter the 6-digit OTP sent to <span id="mobileDisplay" class="font-semibold"></span></p>
+                </div>
+                
+                <form id="otpForm" class="space-y-6">
+                    <div class="flex justify-center gap-3 mb-4">
+                        <input type="text" class="otp-input" maxlength="1" id="otp1" pattern="[0-9]" inputmode="numeric">
+                        <input type="text" class="otp-input" maxlength="1" id="otp2" pattern="[0-9]" inputmode="numeric">
+                        <input type="text" class="otp-input" maxlength="1" id="otp3" pattern="[0-9]" inputmode="numeric">
+                        <input type="text" class="otp-input" maxlength="1" id="otp4" pattern="[0-9]" inputmode="numeric">
+                        <input type="text" class="otp-input" maxlength="1" id="otp5" pattern="[0-9]" inputmode="numeric">
+                        <input type="text" class="otp-input" maxlength="1" id="otp6" pattern="[0-9]" inputmode="numeric">
+                    </div>
+                    
+                    <div id="step2Error" class="hidden text-red-600 text-sm bg-red-50 p-3 rounded-lg"></div>
+                    
+                    <button type="submit" class="w-full bg-black text-white py-3 rounded-lg font-bold hover:bg-gray-900 transition duration-200 transform hover:scale-105">
+                        <i class="fas fa-check mr-2"></i>Verify OTP
+                    </button>
+                    
+                    <button type="button" onclick="resendOTP()" class="w-full text-amber-600 py-2 font-semibold hover:text-amber-700 transition">
+                        <i class="fas fa-redo mr-2"></i>Resend OTP
+                    </button>
+                    
+                    <button type="button" onclick="goToStep(1)" class="w-full bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">
+                        <i class="fas fa-arrow-left mr-2"></i>Back
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 hidden">
+        <div id="toastContent" class="flex items-center gap-3 px-5 py-3 rounded-xl shadow-xl bg-white border">
+            <i id="toastIcon" class="fas fa-info-circle text-gray-600"></i>
+            <span id="toastMessage" class="text-gray-800 font-medium"></span>
+        </div>
+    </div>
+
+    <script>
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastContent = document.getElementById('toastContent');
+            
+            toastMsg.textContent = message;
+            
+            // Reset classes
+            toastIcon.className = '';
+            toastContent.className = 'flex items-center gap-3 px-5 py-3 rounded-xl shadow-xl bg-white border';
+            
+            if (type === 'success') {
+                toastIcon.className = 'fas fa-check-circle text-green-600';
+                toastContent.className += ' border-green-200';
+            } else if (type === 'error') {
+                toastIcon.className = 'fas fa-times-circle text-red-600';
+                toastContent.className += ' border-red-200';
+            } else if (type === 'warning') {
+                toastIcon.className = 'fas fa-exclamation-triangle text-amber-600';
+                toastContent.className += ' border-amber-200';
+            } else {
+                toastIcon.className = 'fas fa-info-circle text-gray-600';
+                toastContent.className += ' border-gray-200';
+            }
+            
+            toast.classList.remove('hidden');
+            
+            clearTimeout(window.__toastTimer);
+            window.__toastTimer = setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2500);
+        }
+        let currentStep = 1;
+        let currentRollNo = '';
+        let currentMobile = '';
+
+        // OTP input navigation
+        const otpInputs = document.querySelectorAll('.otp-input');
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value.length === 1 && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+            });
+            
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+            
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pastedData = e.clipboardData.getData('text').trim().slice(0, 6);
+                for (let i = 0; i < pastedData.length && i < otpInputs.length; i++) {
+                    otpInputs[i].value = pastedData[i];
+                }
+                if (pastedData.length === 6) {
+                    otpInputs[5].focus();
+                } else if (pastedData.length > 0) {
+                    otpInputs[pastedData.length].focus();
+                }
+            });
+        });
+
+        function goToStep(step) {
+            document.querySelectorAll('.step-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`step${step}`).classList.remove('hidden');
+            currentStep = step;
+            hideError(step);
+        }
+
+        function showError(step, message) {
+            const errorDiv = document.getElementById(`step${step}Error`);
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function hideError(step) {
+            const errorDiv = document.getElementById(`step${step}Error`);
+            errorDiv.classList.add('hidden');
+        }
+
+        // Step 1: Roll Number and DOB
+        document.getElementById('loginForm1').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideError(1);
+            
+            const rollNo = document.getElementById('rollNo').value.trim();
+            const dob = document.getElementById('dob').value.trim();
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rollNo, dob })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentRollNo = rollNo;
+                    // Auto-send OTP to verified mobile
+                    const otpRes = await fetch('/api/send-otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ rollNo: currentRollNo })
+                    });
+                    const otpData = await otpRes.json();
+                    if (otpData.success) {
+                        currentMobile = otpData.maskedMobile || '';
+                        document.getElementById('mobileDisplay').textContent = otpData.maskedMobile || '';
+                        goToStep(2);
+                        showToast('OTP has been sent successfully!', 'success');
+                    } else {
+                        showError(1, otpData.error || 'Failed to send OTP. Please try again.');
+                        showToast(otpData.error || 'Failed to send OTP. Please try again.', 'error');
+                    }
+                } else {
+                    showError(1, data.error || 'Invalid roll number or date of birth');
+                    showToast(data.error || 'Invalid credentials', 'error');
+                }
+            } catch (error) {
+                showError(1, 'An error occurred. Please try again.');
+                showToast('An error occurred. Please try again.', 'error');
+            }
+        });
+
+        // Step 2: OTP is sent automatically after credentials
+
+        // Step 2: OTP Verification
+        document.getElementById('otpForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideError(2);
+            
+            const otp = Array.from(otpInputs).map(input => input.value).join('');
+            
+            if (otp.length !== 6) {
+                showError(2, 'Please enter all 6 digits');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rollNo: currentRollNo, otp })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    window.location.href = '/';
+                } else {
+                    showError(2, data.error || 'Invalid OTP. Please try again.');
+                    // Clear OTP inputs
+                    otpInputs.forEach(input => input.value = '');
+                    otpInputs[0].focus();
+                }
+            } catch (error) {
+                showError(2, 'An error occurred. Please try again.');
+            }
+        });
+
+        async function resendOTP() {
+            hideError(2);
+            try {
+                const response = await fetch('/api/send-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rollNo: currentRollNo })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast('OTP has been resent successfully!', 'success');
+                    otpInputs.forEach(input => input.value = '');
+                    otpInputs[0].focus();
+                } else {
+                    showError(2, data.error || 'Failed to resend OTP. Please try again.');
+                    showToast(data.error || 'Failed to resend OTP. Please try again.', 'error');
+                }
+            } catch (error) {
+                showError(2, 'An error occurred. Please try again.');
+                showToast('An error occurred. Please try again.', 'error');
+            }
+        }
+    </script>
+</body>
+</html>
+
