@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard - {{ student.studentName }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{{ url_for('static', filename='js/tailwindcss.js') }}"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
@@ -28,10 +28,15 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
         .gradient-text {
-            background: linear-gradient(180deg, #4F46E5 0%, #9333EA 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+            /* Override to matte black for icons/text that used gradient */
+            color: #0a0a0a !important;
+            background: none !important;
+            -webkit-background-clip: initial !important;
+            background-clip: initial !important;
+        }
+        /* Make all Font Awesome icons matte black */
+        .fa, .fas, .far, .fal, .fat, .fad, .fab {
+            color: #0a0a0a;
         }
     </style>
 </head>
@@ -42,26 +47,7 @@
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="flex items-center space-x-4 mb-4 md:mb-0">
                     <span class="inline-block" aria-hidden="true">
-                        <svg width="56" height="56" viewBox="0 0 640 640" xmlns="http://www.w3.org/2000/svg">
-                          <defs>
-                            <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stop-color="#4F46E5"/>
-                              <stop offset="100%" stop-color="#9333EA"/>
-                            </linearGradient>
-                            <linearGradient id="badgeGrad" x1="0" y1="0" x2="1" y2="1">
-                              <stop offset="0%" stop-color="#6366F1"/>
-                              <stop offset="100%" stop-color="#8B5CF6"/>
-                            </linearGradient>
-                            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-                              <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#00000040"/>
-                            </filter>
-                          </defs>
-                          <path fill="url(#grad)" filter="url(#shadow)"
-                            d="M337.3 51C325.9 48.7 314.2 48.7 302.8 51L115.3 88.5C104.1 90.7 96 100.6 96 112C96 122.3 102.5 131.3 112 134.6L112 208L96.3 286.6C96.1 287.5 96 288.5 96 289.5C96 297.5 102.5 304.1 110.6 304.1L145.5 304.1C153.5 304.1 160.1 297.6 160.1 289.5C160.1 288.5 160 287.6 159.8 286.6L144 208L144 141.3L192 150.9L192 208C192 278.7 249.3 336 320 336C390.7 336 448 278.7 448 208L448 150.9L524.7 135.6C535.9 133.3 544 123.4 544 112C544 100.6 535.9 90.7 524.7 88.5L337.3 51zM320 288C275.8 288 240 252.2 240 208L400 208C400 252.2 364.2 288 320 288zM216.1 384.1C154.7 412.3 112 474.3 112 546.3C112 562.7 125.3 576 141.7 576L296 576L296 430L238.6 387C232.1 382.1 223.4 380.8 216 384.2zM344 576L498.3 576C514.7 576 528 562.7 528 546.3C528 474.3 485.3 412.3 423.9 384.2C416.5 380.8 407.8 382.1 401.3 387L343.9 430L343.9 576z"/>
-                          <circle cx="460" cy="370" r="68" fill="#ffffff40" filter="url(#shadow)" />
-                          <circle cx="460" cy="370" r="60" fill="url(#badgeGrad)" stroke="#ffffff" stroke-width="5"/>
-                          <text x="460" y="396" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="80" fill="#ffffff" font-weight="bold">i</text>
-                        </svg>
+                        <i class="fas fa-user-graduate text-4xl" style="color:#000000;"></i>
                     </span>
                     <div>
                         <h1 class="text-2xl md:text-3xl font-extrabold tracking-wide text-gray-900">CHAKSHU</h1>
@@ -329,7 +315,7 @@
 
         <!-- Footer -->
         <footer class="text-center text-white mt-6">
-            <p class="text-sm opacity-75">© 2024 Student Portal. All rights reserved.</p>
+            <p class="text-sm opacity-75">© 2025 Moulya | Developed by Incubation Center | All Rights Reserved.</p>
         </footer>
     </div>
 </body>

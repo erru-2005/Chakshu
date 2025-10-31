@@ -50,6 +50,15 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def admin_login_required(f):
+    """Decorator to protect admin routes"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('admin_logged_in'):
+            return redirect(url_for('admin_login_page'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 # Login Routes
 @app.route('/login')
 def login_page():
@@ -246,6 +255,34 @@ def logout():
     session.clear()
     return redirect(url_for('login_page'))
 
+# Admin Auth Routes
+@app.route('/admin/login', methods=['GET'])
+def admin_login_page():
+    if session.get('admin_logged_in'):
+        return redirect(url_for('admin_dashboard'))
+    return render_template('admin_login.html')
+
+@app.route('/admin/login', methods=['POST'])
+def admin_login_submit():
+    try:
+        username = (request.form.get('username') or '').strip()
+        password = (request.form.get('password') or '').strip()
+
+        if username == 'admin' and password == 'admin@2005':
+            session['admin_logged_in'] = True
+            return redirect(url_for('admin_dashboard'))
+        else:
+            flash('Invalid admin credentials', 'error')
+            return redirect(url_for('admin_login_page'))
+    except Exception as e:
+        flash(str(e), 'error')
+        return redirect(url_for('admin_login_page'))
+
+@app.route('/admin/logout')
+def admin_logout():
+    session.pop('admin_logged_in', None)
+    return redirect(url_for('admin_login_page'))
+
 @app.route('/')
 @login_required
 def dashboard():
@@ -271,7 +308,12 @@ def dashboard():
         return redirect(url_for('login_page'))
 
 @app.route('/admin')
-def index():
+def admin_root_redirect():
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/dashboard')
+@admin_login_required
+def admin_dashboard():
     return render_template('student_form.html')
 
 @app.route('/search_barcode', methods=['POST'])
