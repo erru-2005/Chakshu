@@ -3352,10 +3352,33 @@
                         {% for student in class_students %}
                         <div class="student-card">
                             <div class="student-card-header">
-                                {% if student.profileImage %}
-                                <img src="{{ url_for('static', filename=student.profileImage) }}" alt="{{ student.studentName }}" class="student-profile-pic" onError="this.onerror=null; this.src='/static/uploads/default.png'">
+                                {% set _resolved = resolve_profile_image_thumb(student.profileImage, student.rollNo) %}
+                                {% if _resolved %}
+                                <img src="{{ url_for('static', filename=_resolved) }}" alt="{{ student.studentName }}" loading="lazy" decoding="async" class="student-profile-pic" onError="this.onerror=null; this.src='/static/uploads/default.png'" width="64" height="64">
                                 {% else %}
-                                <img src="{{ url_for('static', filename='default.jpg') }}" alt="No Photo" class="student-profile-pic">
+                                {# Server-rendered initials avatar fallback #}
+                                {% set _name = (student.studentName or '').strip() %}
+                                {% set _parts = _name.split() %}
+                                {% if _parts|length == 0 %}
+                                <img src="{{ url_for('static', filename='default.jpg') }}" alt="No Photo" loading="lazy" class="student-profile-pic">
+                                {% else %}
+                                    {% if _parts|length == 1 %}
+                                        {% set _initials = (_parts[0][:2]).upper() %}
+                                    {% else %}
+                                        {% set _initials = (_parts[0][0] ~ _parts[-1][0]).upper() %}
+                                    {% endif %}
+                                    {% set _colors = ['hsl(0, 70%, 55%)','hsl(140, 55%, 45%)','hsl(210, 70%, 50%)','hsl(270, 65%, 55%)','hsl(28, 85%, 55%)','hsl(330, 70%, 60%)','hsl(190, 65%, 45%)','hsl(50, 85%, 50%)'] %}
+                                    {% set _idx = (_name|length) % (_colors|length) %}
+                                    {% set theme = avatar_theme(_name) %}
+                                    <div class="student-profile-pic" style="
+                                        background: {{ theme.bg }};
+                                        color: {{ theme.fg }}; display:flex; align-items:center; justify-content:center;
+                                        font-weight:800; font-size:22px; text-transform:uppercase;
+                                        border: 2px solid rgba(255,255,255,0.35); box-shadow: 0 6px 18px rgba(30,64,175,0.25);
+                                        text-shadow: 0 1px 2px rgba(0,0,0,0.25); margin-right: 12px;">
+                                        {{ _initials }}
+                                    </div>
+                                {% endif %}
                                 {% endif %}
                                 <div class="student-info">
                                     <div class="student-name">{{ student.studentName }}</div>
@@ -3564,7 +3587,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="/static/js/notifications.js"></script>
-    <script src="/static/js/search.js"></script>
+    <script src="{{ url_for('static', filename='js/search.js') }}?v=2"></script>
     <script src="/static/js/excel_upload.js"></script>
 
     <!-- Include our enhanced student search JS -->
@@ -4324,6 +4347,85 @@
 
     <!-- Add the function to view student details with profile image support -->
     <script>
+        // Helpers to build initial avatars for students without images
+        function getInitials(name) {
+            try {
+                if (!name) return '';
+                const cleaned = String(name)
+                    .replace(/[_.,-]+/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                if (!cleaned) return '';
+                const parts = cleaned.split(' ').filter(Boolean);
+                // Remove non-letter parts (like single letters that are not alphabets)
+                const tokens = parts.map(p => p.replace(/[^A-Za-z]/g, '')).filter(Boolean);
+                if (tokens.length === 0) return '';
+                if (tokens.length === 1) {
+                    const word = tokens[0];
+                    return (word[0] || '').toUpperCase() + (word[1] ? word[1].toUpperCase() : '');
+                }
+                // Use first letter of first token and first letter of last token (surname)
+                const first = tokens[0][0] || '';
+                const last = tokens[tokens.length - 1][0] || '';
+                return (first + last).toUpperCase();
+            } catch (e) {
+                return '';
+            }
+        }
+
+        function pickColor(name) {
+            // Deterministic color from palette using simple hash
+            const palette = [
+                'hsl(0, 70%, 55%)',    // red
+                'hsl(140, 55%, 45%)',  // green
+                'hsl(210, 70%, 50%)',  // blue
+                'hsl(270, 65%, 55%)',  // purple
+                'hsl(28, 85%, 55%)',   // orange
+                'hsl(330, 70%, 60%)',  // pink
+                'hsl(190, 65%, 45%)',  // teal
+                'hsl(50, 85%, 50%)'    // yellow
+            ];
+            const str = String(name || '');
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash |= 0;
+            }
+            const idx = Math.abs(hash) % palette.length;
+            return palette[idx];
+        }
+
+        function renderInitialAvatars() {
+            const nodes = document.querySelectorAll('.student-initial-avatar');
+            nodes.forEach(node => {
+                const name = node.getAttribute('data-name') || '';
+                const initials = getInitials(name);
+                if (!initials) {
+                    // Fallback when algorithm cannot derive initials
+                    const img = document.createElement('img');
+                    img.src = '/static/default.jpg';
+                    img.alt = 'No Photo';
+                    img.className = 'student-profile-pic';
+                    node.replaceWith(img);
+                    return;
+                }
+                node.textContent = initials;
+                node.style.backgroundColor = pickColor(name);
+                node.style.color = '#fff';
+                node.style.width = '64px';
+                node.style.height = '64px';
+                node.style.borderRadius = '50%';
+                node.style.display = 'flex';
+                node.style.alignItems = 'center';
+                node.style.justifyContent = 'center';
+                node.style.fontWeight = '700';
+                node.style.fontSize = '22px';
+                node.style.textTransform = 'uppercase';
+                node.classList.add('student-profile-pic');
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', renderInitialAvatars);
         // Function to view student details
         function viewStudentDetails(button) {
             const studentData = JSON.parse(button.getAttribute('data-student'));
@@ -4331,8 +4433,17 @@
             
             const modal = new bootstrap.Modal(document.getElementById('studentDetailsModal'));
             const modalBody = document.getElementById('studentDetails');
+            // Helper to format percentage values consistently
+            function formatPercentage(val) {
+                const num = parseFloat(val);
+                if (isNaN(num)) return val || 'N/A';
+                const s = num.toFixed(2);
+                return s.endsWith('.00') ? s.slice(0, -3) : s;
+            }
             
             // Build the student details HTML with a modern, attractive layout
+            const _initials = getInitials(studentData.studentName);
+            const _color = pickColor(studentData.studentName);
             modalBody.innerHTML = `
                 <div class="student-profile">
                     <div class="profile-header">
@@ -4341,9 +4452,12 @@
               ? `<img src="${window.location.origin}/static/${studentData.profileImage}" 
                        alt="${studentData.studentName}" 
                        class="profile-thumb"
+                       loading="lazy"
                        onclick="showFullImage('${window.location.origin}/static/${studentData.profileImage}')"
                        onerror="this.src='${window.location.origin}/static/uploads/default.png'" />` 
-                              : `<div class="avatar-text">${studentData.studentName.charAt(0).toUpperCase()}</div>`}
+                              : (_initials 
+                                 ? `<div class="avatar-text" style="background:${_color}; color:#fff;">${_initials}</div>`
+                                 : `<img src="${window.location.origin}/static/default.jpg" alt="No Photo" class="profile-thumb" />`)}
                         </div>
                         <div class="header-info">
                             <h2 class="student-name">${studentData.studentName}</h2>
@@ -4500,7 +4614,7 @@
                                     </div>
                                     <div class="detail-item">
                                         <span class="detail-label">PUC Percentage</span>
-                                        <span class="detail-value">${studentData.pucPercentage || 'N/A'}</span>
+                                        <span class="detail-value">${formatPercentage(studentData.pucPercentage)}</span>
                                     </div>
                                     <div class="detail-item">
                                         <span class="detail-label">Aadhar No</span>

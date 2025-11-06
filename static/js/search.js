@@ -2,165 +2,71 @@
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
     const studentList = document.getElementById('studentList');
-    
-    if (searchInput) {
-        // Store original content
-        const originalContent = studentList.innerHTML;
-        studentList.setAttribute('data-original-content', originalContent);
-        
-        // Add debounce to avoid excessive API calls
-        let searchTimeout = null;
-        
-        searchInput.addEventListener('input', function(e) {
-            const query = e.target.value.trim();
-            
-            // Clear previous timeout
-            if (searchTimeout) {
-                clearTimeout(searchTimeout);
-            }
-            
-            // Add loading state
-            studentList.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div></div>';
-            
-            // Set new timeout
-            searchTimeout = setTimeout(() => {
-                if (query.length === 0) {
-                    showAllStudents();
-                    return;
+    if (!searchInput || !studentList) return;
+
+    const categorySections = Array.from(studentList.querySelectorAll('.category-section'));
+    const allCards = Array.from(studentList.querySelectorAll('.student-card'));
+
+    let searchTimeout = null;
+    searchInput.addEventListener('input', function(e) {
+        const query = (e.target.value || '').toLowerCase().trim();
+        if (searchTimeout) clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => filterCards(query), 100);
+    });
+
+    function filterCards(query) {
+        const start = performance.now();
+        let visibleCount = 0;
+
+        if (!query) {
+            categorySections.forEach(section => section.style.display = '');
+            allCards.forEach(card => card.style.display = '');
+            updateStats(allCards.length, start);
+            return;
+        }
+
+        categorySections.forEach(section => {
+            let anyVisible = false;
+            const cards = Array.from(section.querySelectorAll('.student-card'));
+            cards.forEach(card => {
+                let haystack = '';
+                const viewBtn = card.querySelector('[data-student]');
+                if (viewBtn) {
+                    try {
+                        const s = JSON.parse(viewBtn.getAttribute('data-student'));
+                        haystack = `${(s.studentName||'').toLowerCase()} ${(s.rollNo||'').toLowerCase()} ${(s.regNo||'').toLowerCase()} ${(s.classSection||'').toLowerCase()}`;
+                    } catch (_) {}
                 }
-                
-                performSearch(query);
-                }, 300);
+                if (!haystack) haystack = card.textContent.toLowerCase();
+
+                const match = haystack.includes(query);
+                card.style.display = match ? '' : 'none';
+                if (match) { anyVisible = true; visibleCount++; }
+            });
+
+            // Show/hide section and update its count
+            section.style.display = anyVisible ? '' : 'none';
+            const countEl = section.querySelector('.category-count');
+            if (countEl) {
+                const count = section.querySelectorAll('.student-card:not([style*="display: none"])').length;
+                countEl.textContent = `${count} Students`;
+            }
         });
+
+        updateStats(visibleCount, start);
+    }
+
+    function updateStats(count, start) {
+        const end = performance.now();
+        const time = (end - start).toFixed(2);
+        const countEl = document.getElementById('searchResultsCount');
+        const timeEl = document.getElementById('searchTime');
+        if (countEl) countEl.textContent = `${count} results`;
+        if (timeEl) timeEl.textContent = `in ${time}ms`;
     }
 });
 
-function performSearch(query) {
-    const startTime = performance.now();
-    
-    // Make API request
-    fetch('/search_students', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            query: query,
-            filter: 'all'
-        })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        const endTime = performance.now();
-        const searchTime = ((endTime - startTime) / 1000).toFixed(2);
-        
-        // Update search stats
-        document.getElementById('searchResultsCount').textContent = `${data.students.length} results`;
-        document.getElementById('searchTime').textContent = `in ${searchTime}s`;
-        
-        if (data.students.length === 0) {
-            studentList.innerHTML = `
-                <div class="no-results text-center py-5">
-                    <i class="fas fa-search fa-3x mb-3 text-muted"></i>
-                    <h4 class="text-muted">No results found</h4>
-                    <p class="text-muted">Try different search terms</p>
-                </div>
-            `;
-        return;
-        }
-        
-        // Group students by class
-        const studentsByClass = {};
-        data.students.forEach(student => {
-            const className = student.classSection || 'Unassigned';
-            if (!studentsByClass[className]) {
-                studentsByClass[className] = [];
-            }
-            studentsByClass[className].push(student);
-        });
-        
-        // Build the HTML for the results
-        let html = '';
-        for (const [className, classStudents] of Object.entries(studentsByClass)) {
-            html += `
-                <div class="category-section">
-                    <div class="category-header">
-                        <div class="category-title">
-                            <i class="fas fa-graduation-cap"></i>
-                            ${className}
-                        </div>
-                        <div class="category-actions">
-                            <div class="category-count">
-                                ${classStudents.length} Students
-                            </div>
-                        </div>
-                    </div>
-                    <div class="student-grid">
-            `;
-            
-            classStudents.forEach(student => {
-        html += `
-                    <div class="student-card">
-                        <div class="student-card-header">
-                <div class="student-info">
-                                <div class="student-name">${student.studentName}</div>
-                                <div class="student-details">
-                                    <div class="detail-line">
-                                        <i class="fas fa-id-card"></i>
-                                        <span>${student.rollNo}</span>
-                                    </div>
-                                    <div class="detail-line">
-                                        <i class="fas fa-registered"></i>
-                                        <span>${student.regNo || 'N/A'}</span>
-                                    </div>
-                                </div>
-                            </div>
-                </div>
-                        <div class="student-card-actions">
-                            <button class="btn btn-primary btn-sm" 
-                                    data-student='${JSON.stringify(student)}'
-                                    onclick="viewStudentDetails(this)">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn-warning btn-sm" 
-                                    onclick="editStudent('${student.rollNo}')">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                            <button class="btn btn-danger btn-sm" 
-                                    data-student-id="${student.rollNo}"
-                                    data-student-name="${student.studentName}"
-                                    data-student-class="${student.classSection || 'Unassigned'}"
-                                    onclick="deleteStudentFromSearch(this)">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            html += `
-                    </div>
-                </div>
-            `;
-        }
-        
-        studentList.innerHTML = html;
-    })
-    .catch(error => {
-        console.error('Search error:', error);
-        studentList.innerHTML = `
-            <div class="alert alert-danger">
-                <i class="fas fa-exclamation-circle me-2"></i>
-                An error occurred while searching. Please try again.
-            </div>
-        `;
-    });
-}
+// remove server-side search; we filter existing cards instead
 
 function showAllStudents() {
     const studentList = document.getElementById('studentList');
@@ -181,6 +87,14 @@ function viewStudentDetails(button) {
     
     const modal = new bootstrap.Modal(document.getElementById('studentDetailsModal'));
     const modalBody = document.getElementById('studentDetails');
+    
+    // Helper to format percentages: keep two decimals, drop trailing .00
+    function formatPercentage(val) {
+        const num = parseFloat(val);
+        if (isNaN(num)) return val || 'N/A';
+        const s = num.toFixed(2);
+        return s.endsWith('.00') ? s.slice(0, -3) : s;
+    }
     
     // Build the student details HTML with a modern, attractive layout
     modalBody.innerHTML = `
@@ -328,7 +242,7 @@ function viewStudentDetails(button) {
                             </div>
                             <div class="detail-item">
                                 <span class="detail-label">PUC Percentage</span>
-                                <span class="detail-value">${studentData.pucPercentage || 'N/A'}</span>
+                                <span class="detail-value">${formatPercentage(studentData.pucPercentage)}</span>
                             </div>
                         </div>
                     </div>

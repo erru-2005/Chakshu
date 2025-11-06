@@ -3,6 +3,7 @@ import os
 import uuid
 from datetime import datetime
 from werkzeug.utils import secure_filename
+from PIL import Image
 from student_data import (
     get_student_by_barcode, 
     check_duplicate_student, 
@@ -19,12 +20,14 @@ from excel_handler import (
     update_students_from_excel, 
     compare_excel_with_database
 )
+from flask import current_app
 
 # Create Flask app
 app = Flask(__name__)
 
 # Add secret key for flash messages
 app.secret_key = os.environ.get('SECRET_KEY', 'default_secret_key_for_development')
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 86400  # cache static files for a day
 
 # Configure upload folders
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
@@ -35,23 +38,162 @@ if not os.path.exists(PROFILE_UPLOAD_FOLDER):
     os.makedirs(PROFILE_UPLOAD_FOLDER)
     
 # Allowed file extensions for profile images
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_EXTENSIONS = {'png', 'webp', 'jpeg', 'gif'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def _resolve_profile_image_internal(profile_image, roll_no):
+    """Return relative static path for an existing profile image.
+    Tries the stored path first, then guesses by roll number with common extensions and cases.
+    """
+    try:
+        static_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+        candidates = []
+        if profile_image:
+            stored = profile_image.replace('\\', '/')
+            candidates.append(os.path.join(static_root, stored))
+            # If JSON still points to .webp/.jpeg/.png but we migrated to .webp, try .webp too
+            base, ext = os.path.splitext(stored)
+            candidates.append(os.path.join(static_root, f"{base}.webp"))
+        roll_str = (str(roll_no or '').strip())
+        if roll_str:
+            for ext in ('webp', 'jpeg', 'png'):
+                # lowercase and uppercase variants
+                candidates.append(os.path.join(static_root, 'uploads', f"{roll_str.lower()}.{ext}"))
+                candidates.append(os.path.join(static_root, 'uploads', f"{roll_str.upper()}.{ext}"))
+            # Also check webp
+            candidates.append(os.path.join(static_root, 'uploads', f"{roll_str.lower()}.webp"))
+            candidates.append(os.path.join(static_root, 'uploads', f"{roll_str.upper()}.webp"))
+        for abs_path in candidates:
+            if os.path.exists(abs_path):
+                return os.path.relpath(abs_path, static_root).replace('\\', '/')
+    except Exception:
+        pass
+    return None
+
+def _resolve_profile_image_thumb(profile_image, roll_no):
+    """Return relative static path for a small thumbnail version if available.
+    Prefers WebP thumbnail, falls back to normal resolver.
+    """
+    try:
+        static_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+        roll_str = (str(roll_no or '').strip())
+        # Prefer webp thumbnails
+        thumb_webp = os.path.join(static_root, 'uploads', 'thumbs', f"{roll_str.lower()}_thumb.webp")
+        if os.path.exists(thumb_webp):
+            return os.path.relpath(thumb_webp, static_root).replace('\\', '/')
+    except Exception:
+        pass
+    return _resolve_profile_image_internal(profile_image, roll_no)
+
+@app.context_processor
+def inject_image_resolver():
+    return {
+        'resolve_profile_image': _resolve_profile_image_internal,
+        'resolve_profile_image_thumb': _resolve_profile_image_thumb
+    }
+
+def _avatar_style(name):
+    try:
+        palette = [
+            'linear-gradient(135deg, hsla(210, 85%, 40%, 0.90), hsla(210, 90%, 55%, 0.75))',  # blue
+            'linear-gradient(135deg, hsla(260, 70%, 45%, 0.90), hsla(260, 80%, 60%, 0.75))',  # purple
+            'linear-gradient(135deg, hsla(340, 75%, 45%, 0.90), hsla(340, 85%, 60%, 0.75))',  # pink
+            'linear-gradient(135deg, hsla(28, 85%, 50%, 0.90), hsla(28, 95%, 60%, 0.75))',   # orange
+            'linear-gradient(135deg, hsla(140, 55%, 40%, 0.90), hsla(140, 65%, 50%, 0.75))', # green
+            'linear-gradient(135deg, hsla(190, 65%, 40%, 0.90), hsla(190, 75%, 55%, 0.75))', # teal
+            'linear-gradient(135deg, hsla(50, 85%, 45%, 0.90), hsla(50, 95%, 55%, 0.75))',   # yellow
+            'linear-gradient(135deg, hsla(280, 70%, 45%, 0.90), hsla(280, 80%, 60%, 0.75))', # indigo
+        ]
+        s = str(name or '').lower()
+        if not s:
+            return palette[0]
+        h = 0
+        for ch in s:
+            h = ((h << 5) - h) + ord(ch)
+            h &= 0xFFFFFFFF
+        return palette[abs(h) % len(palette)]
+    except Exception:
+        return 'linear-gradient(135deg, hsla(210, 85%, 40%, 0.90), hsla(210, 90%, 55%, 0.75))'
+
+def _avatar_theme(name):
+    """Return a dict with bg and fg (text) color ensuring readability."""
+    # Backgrounds from a diverse professional palette
+    palettes = [
+        ("linear-gradient(135deg, hsla(210, 85%, 40%, 0.90), hsla(210, 90%, 55%, 0.75))", "#ffffff"), # blue -> white text
+        ("linear-gradient(135deg, hsla(260, 70%, 45%, 0.90), hsla(260, 80%, 60%, 0.75))", "#ffffff"), # purple -> white
+        ("linear-gradient(135deg, hsla(340, 75%, 45%, 0.90), hsla(340, 85%, 60%, 0.75))", "#ffffff"), # pink -> white
+        ("linear-gradient(135deg, hsla(28, 85%, 50%, 0.90), hsla(28, 95%, 60%, 0.75))", "#1f2937"),  # orange -> dark text
+        ("linear-gradient(135deg, hsla(140, 55%, 40%, 0.90), hsla(140, 65%, 50%, 0.75))", "#ffffff"), # green -> white
+        ("linear-gradient(135deg, hsla(190, 65%, 40%, 0.90), hsla(190, 75%, 55%, 0.75))", "#ffffff"), # teal -> white
+        ("linear-gradient(135deg, hsla(50, 85%, 45%, 0.90), hsla(50, 95%, 55%, 0.75))", "#1f2937"),   # yellow -> dark
+        ("linear-gradient(135deg, hsla(280, 70%, 45%, 0.90), hsla(280, 80%, 60%, 0.75))", "#ffffff"), # indigo -> white
+    ]
+    s = str(name or '').lower()
+    if not s:
+        return { 'bg': palettes[0][0], 'fg': palettes[0][1] }
+    h = 0
+    for ch in s:
+        h = ((h << 5) - h) + ord(ch)
+        h &= 0xFFFFFFFF
+    bg, fg = palettes[abs(h) % len(palettes)]
+    return { 'bg': bg, 'fg': fg }
+
+@app.context_processor
+def inject_avatar_style():
+    return {
+        'avatar_style': _avatar_style,
+        'avatar_theme': _avatar_theme
+    }
+
 def save_profile_image(file, roll_no):
-    """Save student profile image with roll number as filename"""
+    """Save and compress student profile image with roll number as filename."""
     if file and allowed_file(file.filename):
-        # Get the file extension
         file_ext = file.filename.rsplit('.', 1)[1].lower()
-        # Create filename using roll number
-        filename = f"{roll_no}.{file_ext}"
+        roll_no_lower = str(roll_no).strip().lower()
+        filename = f"{roll_no_lower}.{file_ext}"
         file_path = os.path.join(PROFILE_UPLOAD_FOLDER, filename)
-        
-        # Save the file
-        file.save(file_path)
-        # Fix the path to match what the template expects
+
+        # Ensure destination folder exists
+        if not os.path.exists(PROFILE_UPLOAD_FOLDER):
+            os.makedirs(PROFILE_UPLOAD_FOLDER)
+
+        # Process with Pillow: resize and compress
+        try:
+            file.stream.seek(0)
+            with Image.open(file.stream) as img:
+                # Convert mode for JPEG if needed
+                if img.mode in ("P", "RGBA"):
+                    img = img.convert("RGB")
+
+                # Resize to a reasonable max dimension to reduce bytes
+                max_size = (800, 800)
+                img.thumbnail(max_size, Image.LANCZOS)
+
+                save_kwargs = {}
+                # Save main as WEBP for smaller size
+                filename = f"{roll_no_lower}.webp"
+                file_path = os.path.join(PROFILE_UPLOAD_FOLDER, filename)
+                img.save(file_path, format='WEBP', quality=80, method=6)
+
+                # Also generate fast WebP thumbnail (256x256)
+                try:
+                    thumb_dir = os.path.join(PROFILE_UPLOAD_FOLDER, 'thumbs')
+                    if not os.path.exists(thumb_dir):
+                        os.makedirs(thumb_dir)
+                    thumb_path = os.path.join(thumb_dir, f"{roll_no_lower}_thumb.webp")
+                    thumb = img.copy()
+                    thumb.thumbnail((256, 256), Image.LANCZOS)
+                    thumb.save(thumb_path, format='WEBP', quality=75, method=6)
+                except Exception:
+                    pass
+
+        except Exception:
+            # If processing fails, fallback to saving original
+            file.stream.seek(0)
+            file.save(file_path)
+
         return f"uploads/{filename}"
     return None
 

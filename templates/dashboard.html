@@ -7,359 +7,544 @@
     <script src="{{ url_for('static', filename='js/tailwindcss.js') }}"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        * {
+            scroll-behavior: smooth;
+        }
         body {
-            background: linear-gradient(135deg, #0f0f10 0%, #1a1a1c 100%);
+            background: #ffffff;
             min-height: 100vh;
         }
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.96);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #d1d5db, transparent);
+            margin: 3rem 0;
         }
-        .card-hover {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        .nav-menu {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 80px;
+            background: #f9fafb;
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
         }
-        .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        .nav-menu.mobile {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            top: auto;
+            height: auto;
+            width: 100%;
+            flex-direction: row;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            margin: 0;
+            border-right: none;
+            border-top: 1px solid #e5e7eb;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
         }
-        .profile-image {
-            border: 4px solid white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        .nav-item {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0.5rem 0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #6b7280;
         }
-        .gradient-text {
-            /* Override to matte black for icons/text that used gradient */
-            color: #0a0a0a !important;
-            background: none !important;
-            -webkit-background-clip: initial !important;
-            background-clip: initial !important;
+        .nav-menu.mobile .nav-item {
+            margin: 0;
+            flex: 0 0 auto;
+            width: 50px;
+            height: 50px;
         }
-        /* Make all Font Awesome icons matte black */
-        .fa, .fas, .far, .fal, .fat, .fad, .fab {
-            color: #0a0a0a;
+        .nav-spacer {
+            display: block;
+        }
+        .nav-menu.mobile .nav-spacer {
+            display: none;
+        }
+        .logout-desktop {
+            display: flex;
+        }
+        .logout-mobile {
+            display: none;
+        }
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-right {
+            text-align: right;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        @media (max-width: 768px) {
+            .logout-desktop {
+                display: none;
+            }
+            .logout-mobile {
+                display: block;
+            }
+            .header-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            .header-right {
+                align-self: flex-end;
+                margin-top: 0.5rem;
+            }
+        }
+        .nav-item.active {
+            background: #000000;
+            color: white;
+        }
+        .main-content {
+            margin-left: 80px;
+            padding: 2rem;
+            width: calc(100% - 80px);
+            min-height: 100vh;
+        }
+        @media (max-width: 768px) {
+            .nav-menu {
+                transform: translateX(-100%);
+            }
+            .nav-menu.mobile {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 1rem;
+                padding-bottom: 80px;
+            }
+        }
+        .section {
+            scroll-margin-top: 2rem;
+        }
+        .profile-header {
+            text-align: center;
+            padding: 3rem 0 2rem;
+        }
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 3px solid #e5e7eb;
+            margin: 0 auto 1.5rem;
+            object-fit: cover;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #1f2937;
+            margin-bottom: 2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .info-item {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+        .info-value {
+            font-size: 1rem;
+            color: #1f2937;
+            font-weight: 500;
+        }
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        @media (max-width: 768px) {
+            .two-col {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
-<body class="min-h-screen py-4 px-4">
-    <div class="max-w-7xl mx-auto">
-        <!-- Header -->
-        <header class="glass-effect rounded-2xl p-4 mb-6 shadow-xl">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="flex items-center space-x-4 mb-4 md:mb-0">
-                    <span class="inline-block" aria-hidden="true">
-                        <i class="fas fa-user-graduate text-4xl" style="color:#000000;"></i>
-                    </span>
+<body>
+    <!-- Navigation Menu -->
+    <nav class="nav-menu" id="navMenu">
+        <a href="#profile" class="nav-item active" data-section="profile" title="Profile">
+            <i class="fas fa-user text-xl"></i>
+        </a>
+        <a href="#personal" class="nav-item" data-section="personal" title="Personal Info">
+            <i class="fas fa-user-circle text-xl"></i>
+        </a>
+        <a href="#contact" class="nav-item" data-section="contact" title="Contact">
+            <i class="fas fa-address-book text-xl"></i>
+        </a>
+        <a href="#academic" class="nav-item" data-section="academic" title="Academic">
+            <i class="fas fa-graduation-cap text-xl"></i>
+        </a>
+        <a href="#additional" class="nav-item" data-section="additional" title="Additional">
+            <i class="fas fa-info-circle text-xl"></i>
+        </a>
+        <div class="nav-spacer" style="flex: 1;"></div>
+        <a href="/logout" class="nav-item logout-desktop" title="Logout">
+            <i class="fas fa-sign-out-alt text-xl"></i>
+        </a>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- CHAKSHU Header -->
+        <header class="mb-8 pb-6 border-b-2 border-gray-200">
+            <div class="header-container">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-user-graduate text-4xl text-gray-900"></i>
                     <div>
-                        <h1 class="text-2xl md:text-3xl font-extrabold tracking-wide text-gray-900">CHAKSHU</h1>
-                        <p class="text-gray-600 text-sm">Welcome, {{ student.studentName }}</p>
+                        <h1 class="text-3xl font-extrabold text-gray-900">CHAKSHU</h1>
+                        <p class="text-gray-600 text-sm italic">Not just an eye, a vision</p>
                     </div>
                 </div>
-                <a href="/logout" class="text-gray-800 hover:text-black font-semibold transition duration-200">Logout</a>
+                <div class="header-right">
+                    <p class="text-gray-700">Welcome, <span class="font-semibold">{{ student.studentName }}</span></p>
+                    <a href="/logout" class="logout-mobile text-gray-800 hover:text-gray-900 font-semibold transition duration-200" title="Logout">
+                        <i class="fas fa-sign-out-alt text-xl"></i>
+                    </a>
+                </div>
             </div>
         </header>
 
-        <!-- Main Content -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Left Column: Profile Card -->
-            <div class="lg:col-span-1">
-                <div class="glass-effect rounded-2xl p-6 shadow-xl card-hover">
-                    <div class="text-center">
-                        <!-- Profile Image -->
-                        <div class="mb-4 flex justify-center">
-                            {% if student.profileImage %}
-                            <img src="{{ url_for('static', filename=student.profileImage) }}" 
-                                 alt="Profile" 
-                                 class="w-32 h-32 rounded-full object-cover profile-image">
-                            {% else %}
-                            <div class="w-32 h-32 rounded-full bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center profile-image">
-                                <i class="fas fa-user text-5xl text-white"></i>
-                            </div>
-                            {% endif %}
-                        </div>
-                        
-                        <!-- Student Name -->
-                        <h2 class="text-2xl font-extrabold text-gray-900 mb-1 tracking-wide">{{ student.studentName }}</h2>
-                        <p class="text-gray-600 mb-4 uppercase">{{ student.programName or 'Student' }}</p>
-                        
-                        <!-- Quick Info -->
-                        <div class="space-y-3 mt-6">
-                            <div class="bg-gray-100 rounded-lg p-3">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-gray-600"><i class="fas fa-id-card mr-2"></i>Roll No:</span>
-                                    <span class="font-semibold text-gray-800">{{ student.rollNo }}</span>
-                                </div>
-                            </div>
-                            
-                            {% if student.regNo %}
-                            <div class="bg-gray-100 rounded-lg p-3">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-gray-600"><i class="fas fa-certificate mr-2"></i>Reg No:</span>
-                                    <span class="font-semibold text-gray-800">{{ student.regNo }}</span>
-                                </div>
-                            </div>
-                            {% endif %}
-                            
-                            <div class="bg-gray-100 rounded-lg p-3">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-gray-600"><i class="fas fa-users mr-2"></i>Class:</span>
-                                    <span class="font-semibold text-gray-800">{{ student.classSection }}</span>
-                                </div>
-                            </div>
-                        </div>
+        <!-- Profile Section -->
+        <section id="profile" class="section">
+            <div class="profile-header">
+                {% set _resolved = resolve_profile_image_thumb(student.profileImage, student.rollNo) %}
+                {% if _resolved %}
+                <img src="{{ url_for('static', filename=_resolved) }}" 
+                     alt="Profile" 
+                     loading="lazy" decoding="async"
+                     class="profile-avatar" width="150" height="150">
+                {% else %}
+                {% set _name = (student.studentName or '').strip() %}
+                {% set _parts = _name.split() %}
+                {% if _parts|length == 0 %}
+                <img src="{{ url_for('static', filename='default.jpg') }}" alt="No Photo" loading="lazy" class="profile-avatar">
+                {% else %}
+                    {% if _parts|length == 1 %}
+                        {% set _initials = (_parts[0][:2]).upper() %}
+                    {% else %}
+                        {% set _initials = (_parts[0][0] ~ _parts[-1][0]).upper() %}
+                    {% endif %}
+                    {% set theme = avatar_theme(_name) %}
+                    <div class="profile-avatar mx-auto" style="
+                        background: {{ theme.bg }};
+                        color: {{ theme.fg }}; display:flex; align-items:center; justify-content:center;
+                        font-weight:900; font-size:3rem; text-transform:uppercase;
+                        border: 3px solid #e5e7eb;">
+                        {{ _initials }}
                     </div>
+                {% endif %}
+                {% endif %}
+                <h2 class="text-4xl font-bold text-gray-900 mt-4 mb-2">{{ student.studentName }}</h2>
+                <p class="text-xl text-gray-600 uppercase">{{ student.programName or 'Student' }}</p>
+            </div>
+            <div class="two-col mt-8">
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-id-card mr-2"></i>Roll No</div>
+                    <div class="info-value">{{ student.rollNo }}</div>
+                </div>
+                {% if student.regNo %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-certificate mr-2"></i>Reg No</div>
+                    <div class="info-value">{{ student.regNo }}</div>
+                </div>
+                {% endif %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-users mr-2"></i>Class</div>
+                    <div class="info-value">{{ student.classSection }}</div>
                 </div>
             </div>
+        </section>
 
-            <!-- Right Column: Details -->
-            <div class="lg:col-span-2">
-                <!-- Personal Information -->
-                <div class="glass-effect rounded-2xl p-6 mb-6 shadow-xl card-hover">
-                    <h3 class="text-xl font-extrabold text-gray-900 mb-4 flex items-center tracking-wide">
-                        <i class="fas fa-user-circle mr-2 gradient-text"></i>Personal Information
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <div class="flex items-center mb-2">
-                                <i class="fas fa-venus-mars gradient-text mr-2"></i>
-                                <span class="text-sm text-gray-600">Gender</span>
-                            </div>
-                            <p class="text-gray-800 font-semibold">{{ student.gender }}</p>
-                        </div>
-                        
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <div class="flex items-center mb-2">
-                                <i class="fas fa-birthday-cake gradient-text mr-2"></i>
-                                <span class="text-sm text-gray-600">Date of Birth</span>
-                            </div>
-                            <p class="text-gray-800 font-semibold">{{ student.dob }}</p>
-                        </div>
-                        
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <div class="flex items-center mb-2">
-                                <i class="fas fa-tint gradient-text mr-2"></i>
-                                <span class="text-sm text-gray-600">Blood Group</span>
-                            </div>
-                            <p class="text-gray-800 font-semibold">{{ student.bloodGroup or 'N/A' }}</p>
-                        </div>
-                        
-                        {% if student.category %}
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <div class="flex items-center mb-2">
-                                <i class="fas fa-tag gradient-text mr-2"></i>
-                                <span class="text-sm text-gray-600">Category</span>
-                            </div>
-                            <p class="text-gray-800 font-semibold">{{ student.category }}</p>
-                        </div>
-                        {% endif %}
-                    </div>
+        <div class="section-divider"></div>
+
+        <!-- Personal Information Section -->
+        <section id="personal" class="section">
+            <h3 class="section-title">Personal Information</h3>
+            <div class="two-col">
+                {% if student.fatherName %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-male mr-2"></i>Father's Name</div>
+                    <div class="info-value">{{ student.fatherName }}</div>
                 </div>
-
-                <!-- Contact Information -->
-                <div class="glass-effect rounded-2xl p-6 mb-6 shadow-xl card-hover">
-                    <h3 class="text-xl font-extrabold text-gray-900 mb-4 flex items-center tracking-wide">
-                        <i class="fas fa-address-book mr-2 gradient-text"></i>Contact Information
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {% if student.email %}
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <div class="flex items-center mb-2">
-                                <i class="fas fa-envelope gradient-text mr-2"></i>
-                                <span class="text-sm text-gray-600">Email</span>
-                            </div>
-                            <p class="text-gray-800 font-semibold break-all">{{ student.email }}</p>
-                        </div>
-                        {% endif %}
-                        
-                        {% if student.studentContact %}
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <div class="flex items-center mb-2">
-                                <i class="fas fa-phone gradient-text mr-2"></i>
-                                <span class="text-sm text-gray-600">Student Contact</span>
-                            </div>
-                            <p class="text-gray-800 font-semibold">+91 {{ student.studentContact }}</p>
-                        </div>
-                        {% endif %}
-                        
-                        {% if student.parentNo %}
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <div class="flex items-center mb-2">
-                                <i class="fas fa-user-friends gradient-text mr-2"></i>
-                                <span class="text-sm text-gray-600">Parent Contact</span>
-                            </div>
-                            <p class="text-gray-800 font-semibold">+91 {{ student.parentNo }}</p>
-                        </div>
-                        {% endif %}
-                        
-                        {% if student.address %}
-                        <div class="bg-gray-50 rounded-lg p-4 md:col-span-2">
-                            <div class="flex items-center mb-2">
-                                <i class="fas fa-map-marker-alt gradient-text mr-2"></i>
-                                <span class="text-sm text-gray-600">Address</span>
-                            </div>
-                            <p class="text-gray-800 font-semibold">{{ student.address }}</p>
-                        </div>
-                        {% endif %}
-                    </div>
+                {% endif %}
+                {% if student.gender %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-venus-mars mr-2"></i>Gender</div>
+                    <div class="info-value">{{ student.gender }}</div>
                 </div>
-
-                <!-- Academic Information -->
-                <div class="glass-effect rounded-2xl p-6 mb-6 shadow-xl card-hover">
-                    <h3 class="text-xl font-extrabold text-gray-900 mb-4 flex items-center tracking-wide">
-                        <i class="fas fa-graduation-cap mr-2 gradient-text"></i>Academic Information
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {% if student.fatherName %}
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <div class="flex items-center mb-2">
-                                <i class="fas fa-male gradient-text mr-2"></i>
-                                <span class="text-sm text-gray-600">Father's Name</span>
-                            </div>
-                            <p class="text-gray-800 font-semibold">{{ student.fatherName }}</p>
-                        </div>
-                        {% endif %}
-                        
-                        {% if student.pucInstitute %}
-                        <div class="bg-gray-50 rounded-lg p-4 md:col-span-2">
-                            <div class="flex items-center mb-2">
-                                <i class="fas fa-school gradient-text mr-2"></i>
-                                <span class="text-sm text-gray-600">Previous Institute</span>
-                            </div>
-                            <p class="text-gray-800 font-semibold">{{ student.pucInstitute }}</p>
-                        </div>
-                        {% endif %}
-                        
-                        {% if student.pucPercentage %}
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <div class="flex items-center mb-2">
-                                <i class="fas fa-percentage gradient-text mr-2"></i>
-                                <span class="text-sm text-gray-600">PUC Percentage</span>
-                            </div>
-                            {% set _pct = ("%.2f"|format((student.pucPercentage|string)|float)) %}
-                            <p class="text-gray-800 font-semibold">{% if _pct.endswith('00') %}{{ _pct[:-3] }}{% else %}{{ _pct }}{% endif %}%</p>
-                        </div>
-                        {% endif %}
-                        
-                        {% if student.pucYear %}
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <div class="flex items-center mb-2">
-                                <i class="fas fa-calendar gradient-text mr-2"></i>
-                                <span class="text-sm text-gray-600">PUC Year</span>
-                            </div>
-                            <p class="text-gray-800 font-semibold">{{ student.pucYear }}</p>
-                        </div>
-                        {% endif %}
-                    </div>
+                {% endif %}
+                {% if student.dob %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-birthday-cake mr-2"></i>Date of Birth</div>
+                    <div class="info-value">{{ student.dob }}</div>
                 </div>
-
-                <!-- Additional Information -->
-                {% if student.state or student.district or student.religion or student.caste or student.abcId %}
-                <div class="glass-effect rounded-2xl p-6 mb-6 shadow-xl card-hover">
-                    <h3 class="text-xl font-extrabold text-gray-900 mb-4 flex items-center tracking-wide">
-                        <i class="fas fa-info-circle mr-2 gradient-text"></i>Additional Information
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {% if student.state %}
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <div class="flex items-center mb-2">
-                                <i class="fas fa-map gradient-text mr-2"></i>
-                                <span class="text-sm text-gray-600">State</span>
-                            </div>
-                            <p class="text-gray-800 font-semibold">{{ student.state }}</p>
-                        </div>
-                        {% endif %}
-                        
-                        {% if student.district %}
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <div class="flex items-center mb-2">
-                                <i class="fas fa-map-pin gradient-text mr-2"></i>
-                                <span class="text-sm text-gray-600">District</span>
-                            </div>
-                            <p class="text-gray-800 font-semibold">{{ student.district }}</p>
-                        </div>
-                        {% endif %}
-                        
-                        {% if student.religion %}
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <div class="flex items-center mb-2">
-                                <i class="fas fa-place-of-worship gradient-text mr-2"></i>
-                                <span class="text-sm text-gray-600">Religion</span>
-                            </div>
-                            <p class="text-gray-800 font-semibold">{{ student.religion }}</p>
-                        </div>
-                        {% endif %}
-                        
-                        {% if student.caste %}
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <div class="flex items-center mb-2">
-                                <i class="fas fa-users gradient-text mr-2"></i>
-                                <span class="text-sm text-gray-600">Caste</span>
-                            </div>
-                            <p class="text-gray-800 font-semibold">{{ student.caste }}</p>
-                        </div>
-                        {% endif %}
-                        
-                        {% if student.abcId %}
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <div class="flex items-center mb-2">
-                                <i class="fas fa-qrcode gradient-text mr-2"></i>
-                                <span class="text-sm text-gray-600">ABC ID</span>
-                            </div>
-                            <p class="text-gray-800 font-semibold">{{ student.abcId }}</p>
-                        </div>
-                        {% endif %}
-                    </div>
+                {% endif %}
+                {% if student.bloodGroup %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-tint mr-2" style="color:#dc2626;"></i>Blood Group</div>
+                    <div class="info-value">{{ student.bloodGroup }}</div>
+                </div>
+                {% endif %}
+                {% if student.category %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-tag mr-2"></i>Category</div>
+                    <div class="info-value">{{ student.category }}</div>
+                </div>
+                {% endif %}
+                {% if student.religion %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-place-of-worship mr-2"></i>Religion</div>
+                    <div class="info-value">{{ student.religion }}</div>
+                </div>
+                {% endif %}
+                {% if student.caste %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-users mr-2"></i>Caste</div>
+                    <div class="info-value">{{ student.caste }}</div>
                 </div>
                 {% endif %}
             </div>
-        </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Contact Information Section -->
+        <section id="contact" class="section">
+            <h3 class="section-title">Contact Information</h3>
+            <div class="two-col">
+                {% if student.email %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-envelope mr-2"></i>Email</div>
+                    <div class="info-value break-all">{{ student.email }}</div>
+                </div>
+                {% endif %}
+                {% if student.studentContact %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-phone mr-2"></i>Student Contact</div>
+                    <div class="info-value">+91 {{ student.studentContact }}</div>
+                </div>
+                {% endif %}
+                {% if student.parentNo %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-user-friends mr-2"></i>Parent Contact</div>
+                    <div class="info-value">+91 {{ student.parentNo }}</div>
+                </div>
+                {% endif %}
+                {% if student.address %}
+                <div class="info-item" style="grid-column: 1 / -1;">
+                    <div class="info-label"><i class="fas fa-map-marker-alt mr-2"></i>Address</div>
+                    <div class="info-value">{{ student.address }}</div>
+                </div>
+                {% endif %}
+                {% if student.state %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-map mr-2"></i>State</div>
+                    <div class="info-value">{{ student.state }}</div>
+                </div>
+                {% endif %}
+                {% if student.district %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-map-pin mr-2"></i>District</div>
+                    <div class="info-value">{{ student.district }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Academic Information Section -->
+        <section id="academic" class="section">
+            <h3 class="section-title">Academic Information</h3>
+            <div class="two-col">
+               
+                {% if student.pucInstitute %}
+                <div class="info-item" style="grid-column: 1 / -1;">
+                    <div class="info-label"><i class="fas fa-school mr-2"></i>Previous Institute</div>
+                    <div class="info-value">{{ student.pucInstitute }}</div>
+                </div>
+                {% endif %}
+                {% if student.pucPercentage %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-percentage mr-2"></i>PUC Percentage</div>
+                    <div class="info-value">
+                        {% set _pct = ("%.2f"|format((student.pucPercentage|string)|float)) %}
+                        {% if _pct.endswith('00') %}{{ _pct[:-3] }}{% else %}{{ _pct }}{% endif %}%
+                    </div>
+                </div>
+                {% endif %}
+                {% if student.pucYear %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-calendar mr-2"></i>PUC Year</div>
+                    <div class="info-value">{{ student.pucYear }}</div>
+                </div>
+                {% endif %}
+                {% if student.pucRollNo %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-id-badge mr-2"></i>PUC Roll No</div>
+                    <div class="info-value">{{ student.pucRollNo }}</div>
+                </div>
+                {% endif %}
+                {% if student.pucTotalMarks %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-chart-line mr-2"></i>PUC Total Marks</div>
+                    <div class="info-value">{{ student.pucTotalMarks }}</div>
+                </div>
+                {% endif %}
+                {% if student.pucObtainedMarks %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-trophy mr-2"></i>PUC Obtained Marks</div>
+                    <div class="info-value">{{ student.pucObtainedMarks }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+
+        {% if student.abcId or student.aadharNo or student.income or student.categoryApplied %}
+        <div class="section-divider"></div>
+
+        <!-- Additional Information Section -->
+        <section id="additional" class="section">
+            <h3 class="section-title">Additional Information</h3>
+            <div class="two-col">
+                {% if student.aadharNo %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-id-card mr-2"></i>Aadhar No</div>
+                    <div class="info-value">{{ student.aadharNo }}</div>
+                </div>
+                {% endif %}
+                {% if student.abcId %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-qrcode mr-2"></i>ABC ID</div>
+                    <div class="info-value">{{ student.abcId }}</div>
+                </div>
+                {% endif %}
+                {% if student.income %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-rupee-sign mr-2"></i>Income</div>
+                    <div class="info-value">{{ student.income }}</div>
+                </div>
+                {% endif %}
+                {% if student.categoryApplied %}
+                <div class="info-item">
+                    <div class="info-label"><i class="fas fa-file-alt mr-2"></i>Category Applied</div>
+                    <div class="info-value">{{ student.categoryApplied }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+        {% endif %}
 
         <!-- Footer -->
-        <footer class="text-center text-white mt-6">
-            <p class="text-sm opacity-75">© 2025 Moulya | Developed by Incubation Center | All Rights Reserved.</p>
+        <footer class="text-center text-gray-500 mt-12 mb-8">
+            <p class="text-sm text-gray-900 font-bold">© 2025 CHAKSHU | Developed by Incubation Center | All Rights Reserved.</p>
         </footer>
     </div>
-</body>
-</html>
 
-<!-- Toast Notification -->
-<div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 hidden">
-    <div id="toastContent" class="flex items-center gap-3 px-5 py-3 rounded-xl shadow-xl bg-white border">
-        <i id="toastIcon" class="fas fa-info-circle text-gray-600"></i>
-        <span id="toastMessage" class="text-gray-800 font-medium"></span>
-    </div>
-</div>
+    <script>
+        // Mobile menu detection
+        function checkMobile() {
+            const navMenu = document.getElementById('navMenu');
+            if (window.innerWidth <= 768) {
+                navMenu.classList.add('mobile');
+            } else {
+                navMenu.classList.remove('mobile');
+            }
+        }
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
 
-<script>
-    function showToast(message, type = 'info') {
-        const toast = document.getElementById('toast');
-        const toastMsg = document.getElementById('toastMessage');
-        const toastIcon = document.getElementById('toastIcon');
-        const toastContent = document.getElementById('toastContent');
+        // Smooth scroll and active menu item
+        document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const sectionId = this.getAttribute('data-section');
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // Update active state
+                    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+
+        // Update active menu on scroll
+        const sections = document.querySelectorAll('.section');
+        const navItems = document.querySelectorAll('.nav-item[data-section]');
         
-        toastMsg.textContent = message;
-        toastIcon.className = '';
-        toastContent.className = 'flex items-center gap-3 px-5 py-3 rounded-xl shadow-xl bg-white border';
-        
-        if (type === 'success') {
-            toastIcon.className = 'fas fa-check-circle text-green-600';
-            toastContent.className += ' border-green-200';
-        } else if (type === 'error') {
-            toastIcon.className = 'fas fa-times-circle text-red-600';
-            toastContent.className += ' border-red-200';
-        } else if (type === 'warning') {
-            toastIcon.className = 'fas fa-exclamation-triangle text-amber-600';
-            toastContent.className += ' border-amber-200';
-        } else {
-            toastIcon.className = 'fas fa-info-circle text-gray-600';
-            toastContent.className += ' border-gray-200';
+        function updateActiveNav() {
+            let current = '';
+            let minDistance = Infinity;
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                const scrollPos = window.pageYOffset + 150; // Offset for better detection
+                
+                // Check if section is in viewport
+                if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
+                    const distance = Math.abs(scrollPos - sectionTop);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        current = section.getAttribute('id');
+                    }
+                }
+            });
+            
+            // If no section is in viewport, find the closest one
+            if (!current) {
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const scrollPos = window.pageYOffset + 150;
+                    const distance = Math.abs(scrollPos - sectionTop);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        current = section.getAttribute('id');
+                    }
+                });
+            }
+            
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-section') === current) {
+                    item.classList.add('active');
+                }
+            });
         }
         
-        toast.classList.remove('hidden');
-        
-        clearTimeout(window.__toastTimer);
-        window.__toastTimer = setTimeout(() => {
-            toast.classList.add('hidden');
-        }, 2500);
-    }
-</script>
-
+        window.addEventListener('scroll', updateActiveNav);
+        updateActiveNav();
+    </script>
+</body>
+</html>

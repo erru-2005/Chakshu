@@ -948,14 +948,14 @@
                     <div class="d-flex align-items-center">
                         <div class="profile-preview-container me-3" style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa;">
                             {% if student.profileImage %}
-                            <img id="profilePreview" src="{{ url_for('static', filename=student.profileImage) }}" alt="Student Photo" style="max-width: 100%; max-height: 100%; object-fit: cover;" onerror="this.src='{{ url_for('static', filename='uploads/default.png') }}'; console.log('Image failed to load, using default');">
+                            <img id="profilePreview" src="{{ url_for('static', filename=student.profileImage) }}" alt="Student Photo" loading="lazy" style="max-width: 100%; max-height: 100%; object-fit: cover;" onerror="this.src='{{ url_for('static', filename='uploads/default.png') }}'; console.log('Image failed to load, using default');">
                             {% else %}
-                            <img id="profilePreview" src="{{ url_for('static', filename='default.jpg') }}" alt="No Photo" style="max-width: 100%; max-height: 100%; object-fit: cover;">
+                            <img id="profilePreview" src="{{ url_for('static', filename='default.jpg') }}" alt="No Photo" loading="lazy" style="max-width: 100%; max-height: 100%; object-fit: cover;">
                             {% endif %}
                         </div>
                         <div class="flex-grow-1">
                             <input type="file" class="form-control" id="profileImage" name="profileImage" accept="image/*" onchange="previewImage(this);">
-                            <div class="form-text">Upload student photo (jpg, png, jpeg). Will be renamed to student roll number.</div>
+                            <div class="form-text">Upload student photo (jpg, png, jpeg, webp). Will be renamed to student roll number.</div>
                         </div>
                     </div>
                 </div>

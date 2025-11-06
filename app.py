@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import json
 import pandas as pd
 from werkzeug.utils import secure_filename
+from PIL import Image
 from datetime import datetime
 from io import BytesIO
 from openpyxl import Workbook
@@ -12,6 +13,7 @@ from openpyxl.styles import PatternFill, Border, Side
 from functools import wraps
 from db import generate_otp, save_otp, verify_otp, get_student_mobile
 from twilio.rest import Client
+from flask import current_app
 
 # Load environment variables
 load_dotenv()
@@ -22,6 +24,7 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'default_secret_key_for_development')
 app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 86400  # cache static files for a day
 
 # Configure upload folder
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
@@ -40,6 +43,96 @@ def load_students():
 def save_students(students):
     with open(STUDENTS_JSON, 'w') as f:
         json.dump(students, f, indent=4)
+
+def _resolve_profile_image_internal(profile_image, roll_no):
+    """Return relative static path for an existing profile image.
+    Tries stored path first, then guesses by roll number with common extensions and cases.
+    """
+    try:
+        static_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+        candidates = []
+        if profile_image:
+            candidates.append(os.path.join(static_root, str(profile_image).replace('\\', '/')))
+        roll_str = (str(roll_no or '').strip())
+        if roll_str:
+            for ext in ('jpg', 'jpeg', 'png'):
+                candidates.append(os.path.join(static_root, 'uploads', f"{roll_str.lower()}.{ext}"))
+                candidates.append(os.path.join(static_root, 'uploads', f"{roll_str.upper()}.{ext}"))
+        for abs_path in candidates:
+            if os.path.exists(abs_path):
+                return os.path.relpath(abs_path, static_root).replace('\\', '/')
+    except Exception:
+        pass
+    return None
+
+def _resolve_profile_image_thumb(profile_image, roll_no):
+    try:
+        static_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+        roll_str = (str(roll_no or '').strip())
+        thumb_webp = os.path.join(static_root, 'uploads', 'thumbs', f"{roll_str.lower()}_thumb.webp")
+        if os.path.exists(thumb_webp):
+            return os.path.relpath(thumb_webp, static_root).replace('\\', '/')
+    except Exception:
+        pass
+    return _resolve_profile_image_internal(profile_image, roll_no)
+
+@app.context_processor
+def inject_image_resolver():
+    return {
+        'resolve_profile_image': _resolve_profile_image_internal,
+        'resolve_profile_image_thumb': _resolve_profile_image_thumb
+    }
+
+def _avatar_style(name):
+    try:
+        palette = [
+            'linear-gradient(135deg, hsla(210, 85%, 40%, 0.90), hsla(210, 90%, 55%, 0.75))',
+            'linear-gradient(135deg, hsla(260, 70%, 45%, 0.90), hsla(260, 80%, 60%, 0.75))',
+            'linear-gradient(135deg, hsla(340, 75%, 45%, 0.90), hsla(340, 85%, 60%, 0.75))',
+            'linear-gradient(135deg, hsla(28, 85%, 50%, 0.90), hsla(28, 95%, 60%, 0.75))',
+            'linear-gradient(135deg, hsla(140, 55%, 40%, 0.90), hsla(140, 65%, 50%, 0.75))',
+            'linear-gradient(135deg, hsla(190, 65%, 40%, 0.90), hsla(190, 75%, 55%, 0.75))',
+            'linear-gradient(135deg, hsla(50, 85%, 45%, 0.90), hsla(50, 95%, 55%, 0.75))',
+            'linear-gradient(135deg, hsla(280, 70%, 45%, 0.90), hsla(280, 80%, 60%, 0.75))',
+        ]
+        s = str(name or '').lower()
+        if not s:
+            return palette[0]
+        h = 0
+        for ch in s:
+            h = ((h << 5) - h) + ord(ch)
+            h &= 0xFFFFFFFF
+        return palette[abs(h) % len(palette)]
+    except Exception:
+        return 'linear-gradient(135deg, hsla(210, 85%, 40%, 0.90), hsla(210, 90%, 55%, 0.75))'
+
+def _avatar_theme(name):
+    palettes = [
+        ("linear-gradient(135deg, hsla(210, 85%, 40%, 0.90), hsla(210, 90%, 55%, 0.75))", "#ffffff"),
+        ("linear-gradient(135deg, hsla(260, 70%, 45%, 0.90), hsla(260, 80%, 60%, 0.75))", "#ffffff"),
+        ("linear-gradient(135deg, hsla(340, 75%, 45%, 0.90), hsla(340, 85%, 60%, 0.75))", "#ffffff"),
+        ("linear-gradient(135deg, hsla(28, 85%, 50%, 0.90), hsla(28, 95%, 60%, 0.75))", "#1f2937"),
+        ("linear-gradient(135deg, hsla(140, 55%, 40%, 0.90), hsla(140, 65%, 50%, 0.75))", "#ffffff"),
+        ("linear-gradient(135deg, hsla(190, 65%, 40%, 0.90), hsla(190, 75%, 55%, 0.75))", "#ffffff"),
+        ("linear-gradient(135deg, hsla(50, 85%, 45%, 0.90), hsla(50, 95%, 55%, 0.75))", "#1f2937"),
+        ("linear-gradient(135deg, hsla(280, 70%, 45%, 0.90), hsla(280, 80%, 60%, 0.75))", "#ffffff"),
+    ]
+    s = str(name or '').lower()
+    if not s:
+        return { 'bg': palettes[0][0], 'fg': palettes[0][1] }
+    h = 0
+    for ch in s:
+        h = ((h << 5) - h) + ord(ch)
+        h &= 0xFFFFFFFF
+    bg, fg = palettes[abs(h) % len(palettes)]
+    return { 'bg': bg, 'fg': fg }
+
+@app.context_processor
+def inject_avatar_style():
+    return {
+        'avatar_style': _avatar_style,
+        'avatar_theme': _avatar_theme
+    }
 
 def login_required(f):
     """Decorator to check if user is logged in"""
@@ -119,14 +212,14 @@ def api_send_otp():
         if 'roll_no' not in session or session['roll_no'].upper() != roll_no.upper():
             return jsonify({'success': False, 'error': 'Session expired. Please login again.'}), 401
 
-        # Fetch verified mobile from MongoDB, otherwise fall back to parentNo from JSON
+        # Fetch verified mobile from MongoDB, otherwise fall back to studentContact from JSON
         mobile = get_student_mobile(roll_no.upper())
         if not mobile:
-            # Fallback: read parentNo from students.json
+            # Fallback: read studentContact from students.json
             students = load_students()
             student = next((s for s in students if s.get('rollNo', '').upper() == roll_no.upper()), None)
             if student:
-                fallback = str(student.get('parentNo') or '').strip()
+                fallback = str(student.get('studentContact') or '').strip()
                 # Normalize fallback number by removing spaces and hyphens
                 fallback_clean = ''.join(c for c in fallback if c.isdigit())
                 # Use only if it looks like an Indian 10-digit number
@@ -186,7 +279,7 @@ def api_send_otp():
                 
                 # Send the OTP message
                 message = client.messages.create(
-                    body=f"Your OTP for CHAKSHU Portal is: {otp}. Valid for 10 minutes. Do not share this OTP with anyone.",
+                    body=f"Your OTP for CHAKSHU is: {otp}. Valid for 4 minutes. Do not share this OTP with anyone.Regards: Incubation Center",
                     from_=twilio_number,
                     to=recipient_number
                 )
@@ -397,17 +490,39 @@ def submit():
                     file_ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else 'jpg'
                     
                     # Create new filename using roll number
-                    new_filename = f"{student_data['rollNo']}.{file_ext}"
+                    new_filename = f"{str(student_data['rollNo']).strip().lower()}.{file_ext}"
                     
                     # Ensure upload directory exists
                     upload_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
                     if not os.path.exists(upload_path):
                         os.makedirs(upload_path)
                     
-                    # Save file
+                    # Save file with compression
+                    # Save main as WEBP
+                    new_filename = f"{str(student_data['rollNo']).strip().lower()}.webp"
                     file_path = os.path.join(upload_path, new_filename)
-                    profile_image.save(file_path)
-                    print(f"Saved profile image to {file_path}")
+                    try:
+                        profile_image.stream.seek(0)
+                        with Image.open(profile_image.stream) as img:
+                            if img.mode in ("P", "RGBA"):
+                                img = img.convert("RGB")
+                            max_size = (800, 800)
+                            img.thumbnail(max_size, Image.LANCZOS)
+                            img.save(file_path, format='WEBP', quality=80, method=6)
+                            # Generate WebP thumbnail
+                            try:
+                                thumb_dir = os.path.join(upload_path, 'thumbs')
+                                if not os.path.exists(thumb_dir):
+                                    os.makedirs(thumb_dir)
+                                thumb_path = os.path.join(thumb_dir, f"{str(student_data['rollNo']).strip().lower()}_thumb.webp")
+                                thumb = img.copy()
+                                thumb.thumbnail((256, 256), Image.LANCZOS)
+                                thumb.save(thumb_path, format='WEBP', quality=75, method=6)
+                            except Exception:
+                                pass
+                    except Exception:
+                        profile_image.stream.seek(0)
+                        profile_image.save(file_path)
                     
                     # Store the relative path in student data
                     student_data['profileImage'] = f"uploads/{new_filename}"
@@ -665,17 +780,40 @@ def edit_student(student_id):
                     file_ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else 'jpg'
                     
                     # Create new filename using student ID (roll number)
-                    new_filename = f"{student_id}.{file_ext}"
+                    new_filename = f"{str(student_id).strip().lower()}.{file_ext}"
                     
                     # Ensure upload directory exists
                     upload_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
                     if not os.path.exists(upload_path):
                         os.makedirs(upload_path)
                     
-                    # Save file
+                    # Save file with compression
+                    # Save main as WEBP
+                    new_filename = f"{str(student_id).strip().lower()}.webp"
                     file_path = os.path.join(upload_path, new_filename)
                     print(f"Saving profile image to: {file_path}")
-                    profile_image.save(file_path)
+                    try:
+                        profile_image.stream.seek(0)
+                        with Image.open(profile_image.stream) as img:
+                            if img.mode in ("P", "RGBA"):
+                                img = img.convert("RGB")
+                            max_size = (800, 800)
+                            img.thumbnail(max_size, Image.LANCZOS)
+                            img.save(file_path, format='WEBP', quality=80, method=6)
+                            # Generate WebP thumbnail
+                            try:
+                                thumb_dir = os.path.join(upload_path, 'thumbs')
+                                if not os.path.exists(thumb_dir):
+                                    os.makedirs(thumb_dir)
+                                thumb_path = os.path.join(thumb_dir, f"{str(student_id).strip().lower()}_thumb.webp")
+                                thumb = img.copy()
+                                thumb.thumbnail((256, 256), Image.LANCZOS)
+                                thumb.save(thumb_path, format='WEBP', quality=75, method=6)
+                            except Exception:
+                                pass
+                    except Exception:
+                        profile_image.stream.seek(0)
+                        profile_image.save(file_path)
                     print(f"Saved profile image to {file_path}")
                     
                     # Store the relative path in student data
@@ -783,7 +921,7 @@ def upload_file():
                 'Email': 'email',
                 'Address': 'address',
                 'Student Contact': 'studentContact',
-                'Parent No': 'parentNo',
+                'Parent No': 'studentContact',
                 
                 # Personal Info
                 'Aadhar No': 'aadharNo',
@@ -1306,8 +1444,32 @@ def bulk_image_upload():
                 new_filename = f"{matching_roll}{file_ext}"
                 file_path = os.path.join(upload_path, new_filename)
                 
-                # Save the file
-                file.save(file_path)
+                # Save the file with compression
+                try:
+                    file.stream.seek(0)
+                    with Image.open(file.stream) as img:
+                        if img.mode in ("P", "RGBA"):
+                            img = img.convert("RGB")
+                        max_size = (800, 800)
+                        img.thumbnail(max_size, Image.LANCZOS)
+                        # Save main as WEBP
+                        new_filename = f"{matching_roll}.webp"
+                        file_path = os.path.join(upload_path, new_filename)
+                        img.save(file_path, format='WEBP', quality=80, method=6)
+                        # Generate WebP thumbnail
+                        try:
+                            thumb_dir = os.path.join(upload_path, 'thumbs')
+                            if not os.path.exists(thumb_dir):
+                                os.makedirs(thumb_dir)
+                            thumb_path = os.path.join(thumb_dir, f"{matching_roll}_thumb.webp")
+                            thumb = img.copy()
+                            thumb.thumbnail((256, 256), Image.LANCZOS)
+                            thumb.save(thumb_path, format='WEBP', quality=75, method=6)
+                        except Exception:
+                            pass
+                except Exception:
+                    file.stream.seek(0)
+                    file.save(file_path)
                 
                 # Update the student record with the image path
                 image_rel_path = f"uploads/{new_filename}"

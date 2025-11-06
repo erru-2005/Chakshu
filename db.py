@@ -22,8 +22,8 @@ def generate_otp(length=6):
     return ''.join(random.choices(string.digits, k=length))
 
 def save_otp(mobile, roll_no, otp):
-    """Save OTP to MongoDB with expiration (10 minutes)"""
-    expires_at = datetime.now() + timedelta(minutes=10)
+    """Save OTP to MongoDB with expiration (4 minutes)"""
+    expires_at = datetime.now() + timedelta(minutes=4)
     
     # Remove old OTPs for this mobile
     otp_collection.delete_many({

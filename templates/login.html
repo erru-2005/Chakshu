@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
-            background: linear-gradient(135deg, #0f0f10 0%, #1a1a1c 100%);
+            background: linear-gradient(135deg, #f6f6f6 0%, #f4f4f6 100%);
         }
         .glass-effect {
             background: rgba(255, 255, 255, 0.96);
@@ -87,7 +87,7 @@
                     
                     <div id="step1Error" class="hidden text-red-600 text-sm bg-red-50 p-3 rounded-lg"></div>
                     
-                    <button type="submit" class="w-full bg-black text-white py-3 rounded-lg font-bold hover:bg-gray-900 transition duration-200 transform hover:scale-105">
+                    <button id="continueBtn" type="submit" class="w-full bg-black text-white py-3 rounded-lg font-bold hover:bg-gray-900 transition duration-200 transform hover:scale-105">
                         <i class="fas fa-arrow-right mr-2"></i>Continue
                     </button>
                 </form>
@@ -111,13 +111,17 @@
                         <input type="text" class="otp-input" maxlength="1" id="otp6" pattern="[0-9]" inputmode="numeric">
                     </div>
                     
+                    <!-- OTP Timer -->
+                    <div id="otpTimer" class="text-center mb-4">
+                        <p class="text-sm text-gray-600">
+                            <i class="fas fa-clock mr-2"></i>
+                            OTP expires in: <span id="timerDisplay" class="font-bold text-amber-600">4:00</span>
+                        </p>
+                    </div>
+                    
                     <div id="step2Error" class="hidden text-red-600 text-sm bg-red-50 p-3 rounded-lg"></div>
                     
-                    <button type="submit" class="w-full bg-black text-white py-3 rounded-lg font-bold hover:bg-gray-900 transition duration-200 transform hover:scale-105">
-                        <i class="fas fa-check mr-2"></i>Verify OTP
-                    </button>
-                    
-                    <button type="button" onclick="resendOTP()" class="w-full text-amber-600 py-2 font-semibold hover:text-amber-700 transition">
+                    <button type="button" onclick="resendOTP()" id="resendBtn" class="w-full text-amber-600 py-2 font-semibold hover:text-amber-700 transition">
                         <i class="fas fa-redo mr-2"></i>Resend OTP
                     </button>
                     
@@ -128,7 +132,7 @@
             </div>
         </div>
         <div class="mt-4 text-center">
-            <p class="text-xs text-gray-300">© 2025 Moulya | Developed by Incubation Center | All Rights Reserved.</p>
+            <p class="text-xs text-gray-900 font-bold">© 2025 CHAKSHU | Developed by Incubation Center | All Rights Reserved.</p>
         </div>
     </div>
 
@@ -177,14 +181,32 @@
         let currentStep = 1;
         let currentRollNo = '';
         let currentMobile = '';
+        let otpTimer = null;
+        let otpExpired = false;
+        const OTP_EXPIRY_SECONDS = 240; // 4 minutes
+        let remainingSeconds = OTP_EXPIRY_SECONDS;
 
-        // OTP input navigation
+        // OTP input navigation and auto-verify
         const otpInputs = document.querySelectorAll('.otp-input');
+        
+        function checkAndVerifyOTP() {
+            const otp = Array.from(otpInputs).map(input => input.value).join('');
+            if (otp.length === 6 && !otpExpired) {
+                verifyOTP(otp);
+            }
+        }
+        
         otpInputs.forEach((input, index) => {
             input.addEventListener('input', (e) => {
+                // Only allow digits
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                
                 if (e.target.value.length === 1 && index < otpInputs.length - 1) {
                     otpInputs[index + 1].focus();
                 }
+                
+                // Auto-verify when all 6 digits are filled
+                checkAndVerifyOTP();
             });
             
             input.addEventListener('keydown', (e) => {
@@ -195,23 +217,83 @@
             
             input.addEventListener('paste', (e) => {
                 e.preventDefault();
-                const pastedData = e.clipboardData.getData('text').trim().slice(0, 6);
+                const pastedData = e.clipboardData.getData('text').trim().slice(0, 6).replace(/[^0-9]/g, '');
                 for (let i = 0; i < pastedData.length && i < otpInputs.length; i++) {
                     otpInputs[i].value = pastedData[i];
                 }
                 if (pastedData.length === 6) {
                     otpInputs[5].focus();
+                    checkAndVerifyOTP();
                 } else if (pastedData.length > 0) {
                     otpInputs[pastedData.length].focus();
                 }
             });
         });
+        
+        // Timer functions
+        function startOTPTimer() {
+            remainingSeconds = OTP_EXPIRY_SECONDS;
+            otpExpired = false;
+            updateTimerDisplay();
+            
+            if (otpTimer) clearInterval(otpTimer);
+            
+            otpTimer = setInterval(() => {
+                remainingSeconds--;
+                updateTimerDisplay();
+                
+                if (remainingSeconds <= 0) {
+                    clearInterval(otpTimer);
+                    otpExpired = true;
+                    document.getElementById('timerDisplay').textContent = 'EXPIRED';
+                    document.getElementById('timerDisplay').classList.remove('text-amber-600');
+                    document.getElementById('timerDisplay').classList.add('text-red-600');
+                    showError(2, 'OTP has expired. Please request a new one.');
+                    showToast('OTP has expired. Please request a new one.', 'error');
+                    // Disable OTP inputs
+                    otpInputs.forEach(input => {
+                        input.disabled = true;
+                        input.style.opacity = '0.5';
+                    });
+                }
+            }, 1000);
+        }
+        
+        function updateTimerDisplay() {
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+            const display = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('timerDisplay').textContent = display;
+        }
+        
+        function stopOTPTimer() {
+            if (otpTimer) {
+                clearInterval(otpTimer);
+                otpTimer = null;
+            }
+        }
 
         function goToStep(step) {
             document.querySelectorAll('.step-content').forEach(el => el.classList.add('hidden'));
             document.getElementById(`step${step}`).classList.remove('hidden');
             currentStep = step;
             hideError(step);
+            
+            if (step === 2) {
+                // Reset OTP inputs and enable them
+                otpInputs.forEach(input => {
+                    input.value = '';
+                    input.disabled = false;
+                    input.style.opacity = '1';
+                });
+                otpInputs[0].focus();
+                // Reset timer display styling
+                const timerDisplay = document.getElementById('timerDisplay');
+                timerDisplay.classList.remove('text-red-600');
+                timerDisplay.classList.add('text-amber-600');
+            } else {
+                stopOTPTimer();
+            }
         }
 
         function showError(step, message) {
@@ -232,6 +314,13 @@
             
             const rollNo = document.getElementById('rollNo').value.trim();
             const dob = document.getElementById('dob').value.trim();
+            const continueBtn = document.getElementById('continueBtn');
+            // Set loading state
+            if (continueBtn) {
+                continueBtn.disabled = true;
+                continueBtn.classList.add('opacity-90');
+                continueBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Please wait...';
+            }
             
             try {
                 const response = await fetch('/api/login', {
@@ -255,31 +344,50 @@
                         currentMobile = otpData.maskedMobile || '';
                         document.getElementById('mobileDisplay').textContent = otpData.maskedMobile || '';
                         goToStep(2);
+                        startOTPTimer(); // Start the timer when OTP is sent
                         showToast('OTP has been sent successfully!', 'success');
+                        // Reset button for next time if user returns
+                        if (continueBtn) {
+                            continueBtn.disabled = false;
+                            continueBtn.innerHTML = '<i class="fas fa-arrow-right mr-2"></i>Continue';
+                        }
                     } else {
                         showError(1, otpData.error || 'Failed to send OTP. Please try again.');
                         showToast(otpData.error || 'Failed to send OTP. Please try again.', 'error');
+                        if (continueBtn) {
+                            continueBtn.disabled = false;
+                            continueBtn.innerHTML = '<i class="fas fa-arrow-right mr-2"></i>Continue';
+                        }
                     }
                 } else {
                     showError(1, data.error || 'Invalid roll number or date of birth');
                     showToast(data.error || 'Invalid credentials', 'error');
+                    if (continueBtn) {
+                        continueBtn.disabled = false;
+                        continueBtn.innerHTML = '<i class="fas fa-arrow-right mr-2"></i>Continue';
+                    }
                 }
             } catch (error) {
                 showError(1, 'An error occurred. Please try again.');
                 showToast('An error occurred. Please try again.', 'error');
+                if (continueBtn) {
+                    continueBtn.disabled = false;
+                    continueBtn.innerHTML = '<i class="fas fa-arrow-right mr-2"></i>Continue';
+                }
             }
         });
 
-        // Step 2: OTP is sent automatically after credentials
-
-        // Step 2: OTP Verification
-        document.getElementById('otpForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // Step 2: OTP Verification (auto-triggered when all 6 digits are entered)
+        async function verifyOTP(otp) {
+            if (otpExpired) {
+                showError(2, 'OTP has expired. Please request a new one.');
+                showToast('OTP has expired. Please request a new one.', 'error');
+                return;
+            }
+            
             hideError(2);
             
-            const otp = Array.from(otpInputs).map(input => input.value).join('');
-            
-            if (otp.length !== 6) {
+            if (!otp || otp.length !== 6) {
                 showError(2, 'Please enter all 6 digits');
                 return;
             }
@@ -294,15 +402,30 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    window.location.href = '/';
+                    stopOTPTimer();
+                    showToast('OTP verified successfully!', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 500);
                 } else {
                     showError(2, data.error || 'Invalid OTP. Please try again.');
+                    showToast(data.error || 'Invalid OTP. Please try again.', 'error');
                     // Clear OTP inputs
                     otpInputs.forEach(input => input.value = '');
                     otpInputs[0].focus();
                 }
             } catch (error) {
                 showError(2, 'An error occurred. Please try again.');
+                showToast('An error occurred. Please try again.', 'error');
+            }
+        }
+        
+        // Prevent form submission (we auto-verify instead)
+        document.getElementById('otpForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const otp = Array.from(otpInputs).map(input => input.value).join('');
+            if (otp.length === 6) {
+                verifyOTP(otp);
             }
         });
 
@@ -318,9 +441,22 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    showToast('OTP has been resent successfully!', 'success');
-                    otpInputs.forEach(input => input.value = '');
+                    // Reset OTP inputs and re-enable them
+                    otpInputs.forEach(input => {
+                        input.value = '';
+                        input.disabled = false;
+                        input.style.opacity = '1';
+                    });
                     otpInputs[0].focus();
+                    
+                    // Reset timer
+                    otpExpired = false;
+                    const timerDisplay = document.getElementById('timerDisplay');
+                    timerDisplay.classList.remove('text-red-600');
+                    timerDisplay.classList.add('text-amber-600');
+                    startOTPTimer();
+                    
+                    showToast('OTP has been resent successfully!', 'success');
                 } else {
                     showError(2, data.error || 'Failed to resend OTP. Please try again.');
                     showToast(data.error || 'Failed to resend OTP. Please try again.', 'error');
